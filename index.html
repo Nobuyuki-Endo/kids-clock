@@ -264,16 +264,31 @@ function getCurrentItem(nowMin) {
       ctx.fill();
     }
 
-    function updateRemain(item, nowMin) {
-      if (!item) {
-        remainText.textContent = "";
-        return;
-      }
+function updateRemain(item, nowMin) {
+  if (!item) {
+    remainText.textContent = "";
+    return;
+  }
 
-      const endMin = timeToMinutes(item.end);
-      const remain = Math.max(0, Math.ceil(endMin - nowMin));
-      remainText.textContent = `あと ${remain} ふん`;
+  const startMin = timeToMinutes(item.start);
+  const endMin = timeToMinutes(item.end);
+
+  let remain;
+
+  if (startMin < endMin) {
+    // 通常
+    remain = Math.ceil(endMin - nowMin);
+  } else {
+    // 日またぎ
+    if (nowMin >= startMin) {
+      remain = Math.ceil((24 * 60 - nowMin) + endMin);
+    } else {
+      remain = Math.ceil(endMin - nowMin);
     }
+  }
+
+  remainText.textContent = `あと ${remain} ふん`;
+}
 
     function updateRightPanel(item) {
       taskText.textContent = item ? item.task : "じかんがくるまで まってね";
