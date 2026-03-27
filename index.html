@@ -48,7 +48,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3.2vw;
+      font-size: 5vw;
       font-weight: bold;
       text-align: center;
       padding: 20px;
@@ -80,12 +80,23 @@
       padding: 20px;
     }
 
-    canvas {
-      width: min(44vw, 44vh);
-      height: min(44vw, 44vh);
-      max-width: 100%;
-      max-height: 100%;
-    }
+.clock-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#remainText {
+  font-size: 3.5vw;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #333;
+}
+
+canvas {
+  width: min(48vw, 48vh);
+  height: min(48vw, 48vh);
+}
   </style>
 </head>
 <body>
@@ -93,6 +104,12 @@
     <div class="left">
       <canvas id="clock" width="900" height="900"></canvas>
     </div>
+<div class="left">
+  <div class="clock-wrapper">
+    <canvas id="clock" width="900" height="900"></canvas>
+    <div id="remainText"></div>
+  </div>
+</div>
 
     <div class="right">
       <div class="task-box" id="taskText">じかんがくるまで まってね</div>
@@ -118,6 +135,7 @@
     const ctx = canvas.getContext("2d");
     const taskText = document.getElementById("taskText");
     const imageBox = document.getElementById("imageBox");
+    const remainText = document.getElementById("remainText");
 
     function timeToMinutes(hhmm) {
       const [h, m] = hhmm.split(":").map(Number);
@@ -230,32 +248,19 @@
       ctx.fill();
     }
 
-    function drawCenterText(item, nowMin) {
-      if (!item) {
-        ctx.fillStyle = "#666";
-        ctx.font = "bold 42px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("じかん じゃないよ", 450, 420);
-        return;
-      }
+function drawCenterText(item, nowMin) {
+  if (!item) return;
 
-      const s = timeToMinutes(item.start);
-      const e = timeToMinutes(item.end);
-      const remain = Math.max(0, Math.ceil(e - nowMin));
+  const e = timeToMinutes(item.end);
+  const remain = Math.max(0, Math.ceil(e - nowMin));
 
-      ctx.fillStyle = "#222";
-      ctx.font = "bold 44px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(item.task, 450, 400);
+  ctx.fillStyle = item.color;
+  ctx.font = "bold 64px sans-serif";
+  ctx.textAlign = "center";
 
-      ctx.fillStyle = item.color;
-      ctx.font = "bold 64px sans-serif";
-      ctx.fillText(`あと ${remain} ふん`, 450, 475);
-
-      ctx.fillStyle = "#666";
-      ctx.font = "36px sans-serif";
-      ctx.fillText(`${item.start} - ${item.end}`, 450, 535);
-    }
+  // ← これだけ残す（やること削除）
+  ctx.fillText(`あと ${remain} ふん`, 450, 460);
+}
 
     function updateRightPanel(item) {
       taskText.textContent = item ? item.task : "じかんがくるまで まってね";
@@ -292,8 +297,19 @@
       drawHands(now);
       drawCenterText(item, nowMin);
       updateRightPanel(item);
+      updateRemain(item, nowMin);
     }
+function updateRemain(item, nowMin) {
+  if (!item) {
+    remainText.textContent = "";
+    return;
+  }
 
+  const e = timeToMinutes(item.end);
+  const remain = Math.max(0, Math.ceil(e - nowMin));
+
+  remainText.textContent = `あと ${remain} ふん`;
+}
     render();
     setInterval(render, 1000);
   </script>
