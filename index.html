@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>こども時間サイネージ</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: sans-serif;
+      background: #f7f7f7;
+      overflow: hidden;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .left, .right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .left {
+      background: #ffffff;
+      padding: 24px;
+    }
+
+    .right {
+      flex-direction: column;
+      background: #eef6ff;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    .task-box {
+      width: 100%;
+      flex: 0 0 24%;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2vw;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .image-box {
+      width: 100%;
+      flex: 1;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .image-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .fallback {
+      font-size: 2.2vw;
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
+
+    canvas {
+      width: min(44vw, 44vh);
+      height: min(44vw, 44vh);
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <canvas id="clock" width="900" height="900"></canvas>
+    </div>
+
+    <div class="right">
+      <div class="task-box" id="taskText">じかんがくるまで まってね</div>
+      <div class="image-box" id="imageBox">
+        <div class="fallback">画像をここに表示</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const schedule = [
+      { start: "07:30", end: "07:50", task: "おきがえ", image: "images/okigae.png", color: "#f6c445" },
+      { start: "07:50", end: "08:10", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
+      { start: "08:10", end: "08:20", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
+      { start: "08:20", end: "08:30", task: "しゅっぱつのじゅんび", image: "images/shuppatsu.png", color: "#ffb36b" },
+      { start: "18:00", end: "18:30", task: "ごはん", image: "images/gohan.png", color: "#ff9e7a" },
+      { start: "18:30", end: "19:00", task: "おふろ", image: "images/ofuro.png", color: "#8fd0ff" },
+      { start: "19:00", end: "19:20", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
+      { start: "19:20", end: "20:00", task: "ねるじゅんび", image: "images/neru.png", color: "#9f8cff" }
+    ];
+
+    const canvas = document.getElementById("clock");
+    const ctx = canvas.getContext("2d");
+    const taskText = document.getElementById("taskText");
+    const imageBox = document.getElementById("imageBox");
+
+    function timeToMinutes(hhmm) {
+      const [h, m] = hhmm.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function getNowMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+    }
+
+    function getCurrentItem(nowMin) {
+      return schedule.find(item => {
+        const s = timeToMinutes(item.start);
+        const e = timeToMinutes(item.end);
+        return nowMin >= s && nowMin < e;
+      }) || null;
+    }
+
+    function minuteToAngle(min) {
+      const hour12 = (min / 60) % 12;
+      return (hour12 / 12) * Math.PI * 2 - Math.PI / 2;
+    }
+
+    function drawArc(startMin, endMin, color, lineWidth) {
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.arc(
+        450, 450, 300,
+        minuteToAngle(startMin),
+        minuteToAngle(endMin),
+        false
+      );
+      ctx.stroke();
+    }
+
+    function drawClockFace() {
+      ctx.clearRect(0, 0, 900, 900);
+
+      ctx.beginPath();
+      ctx.fillStyle = "#fff";
+      ctx.arc(450, 450, 360, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = "#ddd";
+      ctx.arc(450, 450, 360, 0, Math.PI * 2);
+      ctx.stroke();
+
+      for (let i = 1; i <= 12; i++) {
+        const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+        const x = 450 + Math.cos(angle) * 285;
+        const y = 450 + Math.sin(angle) * 285;
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 48px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(String(i), x, y);
+      }
+
+      for (let i = 0; i < 60; i++) {
+        const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+        const outer = 340;
+        const inner = i % 5 === 0 ? 315 : 328;
+        const x1 = 450 + Math.cos(angle) * inner;
+        const y1 = 450 + Math.sin(angle) * inner;
+        const x2 = 450 + Math.cos(angle) * outer;
+        const y2 = 450 + Math.sin(angle) * outer;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = i % 5 === 0 ? "#777" : "#bbb";
+        ctx.lineWidth = i % 5 === 0 ? 5 : 2;
+        ctx.stroke();
+      }
+    }
+
+    function drawHands(now) {
+      const hour = now.getHours() % 12 + now.getMinutes() / 60;
+      const minute = now.getMinutes() + now.getSeconds() / 60;
+      const second = now.getSeconds();
+
+      const hourAngle = (hour / 12) * Math.PI * 2 - Math.PI / 2;
+      const minuteAngle = (minute / 60) * Math.PI * 2 - Math.PI / 2;
+      const secondAngle = (second / 60) * Math.PI * 2 - Math.PI / 2;
+
+      function hand(angle, length, width, color) {
+        ctx.beginPath();
+        ctx.moveTo(450, 450);
+        ctx.lineTo(
+          450 + Math.cos(angle) * length,
+          450 + Math.sin(angle) * length
+        );
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
+
+      hand(hourAngle, 160, 14, "#333");
+      hand(minuteAngle, 240, 10, "#444");
+      hand(secondAngle, 270, 4, "#e33");
+
+      ctx.beginPath();
+      ctx.fillStyle = "#333";
+      ctx.arc(450, 450, 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawCenterText(item, nowMin) {
+      if (!item) {
+        ctx.fillStyle = "#666";
+        ctx.font = "bold 42px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("じかん じゃないよ", 450, 420);
+        return;
+      }
+
+      const s = timeToMinutes(item.start);
+      const e = timeToMinutes(item.end);
+      const remain = Math.max(0, Math.ceil(e - nowMin));
+
+      ctx.fillStyle = "#222";
+      ctx.font = "bold 44px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(item.task, 450, 400);
+
+      ctx.fillStyle = item.color;
+      ctx.font = "bold 64px sans-serif";
+      ctx.fillText(`あと ${remain} ふん`, 450, 475);
+
+      ctx.fillStyle = "#666";
+      ctx.font = "36px sans-serif";
+      ctx.fillText(`${item.start} - ${item.end}`, 450, 535);
+    }
+
+    function updateRightPanel(item) {
+      taskText.textContent = item ? item.task : "じかんがくるまで まってね";
+
+      imageBox.innerHTML = "";
+      if (item && item.image) {
+        const img = document.createElement("img");
+        img.src = item.image;
+        img.alt = item.task;
+        img.onerror = () => {
+          imageBox.innerHTML = '<div class="fallback">画像が見つかりません</div>';
+        };
+        imageBox.appendChild(img);
+      } else {
+        imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
+      }
+    }
+
+    function render() {
+      const now = new Date();
+      const nowMin = getNowMinutes();
+      const item = getCurrentItem(nowMin);
+
+      drawClockFace();
+
+      if (item) {
+        const s = timeToMinutes(item.start);
+        const e = timeToMinutes(item.end);
+
+        drawArc(s, e, "#dfe8f5", 42);
+        drawArc(s, nowMin, item.color, 42);
+      }
+
+      drawHands(now);
+      drawCenterText(item, nowMin);
+      updateRightPanel(item);
+    }
+
+    render();
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>
