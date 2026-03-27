@@ -40,19 +40,45 @@
       gap: 20px;
     }
 
+    .clock-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      width: min(56vw, 56vh);
+      height: min(56vw, 56vh);
+      max-width: 100%;
+      max-height: calc(100% - 90px);
+    }
+
+    #remainText {
+      margin-top: 12px;
+      font-size: 3.8vw;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      line-height: 1.2;
+      min-height: 1.4em;
+    }
+
     .task-box {
       width: 100%;
-      flex: 0 0 24%;
+      flex: 0 0 26%;
       background: white;
       border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 5vw;
+      font-size: 6vw;
       font-weight: bold;
       text-align: center;
       padding: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     }
 
     .image-box {
@@ -64,7 +90,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     }
 
     .image-box img {
@@ -79,37 +105,16 @@
       text-align: center;
       padding: 20px;
     }
-
-.clock-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#remainText {
-  font-size: 3.5vw;
-  font-weight: bold;
-  margin-top: 10px;
-  color: #333;
-}
-
-canvas {
-  width: min(48vw, 48vh);
-  height: min(48vw, 48vh);
-}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="left">
-      <canvas id="clock" width="900" height="900"></canvas>
+      <div class="clock-wrapper">
+        <canvas id="clock" width="900" height="900"></canvas>
+        <div id="remainText"></div>
+      </div>
     </div>
-<div class="left">
-  <div class="clock-wrapper">
-    <canvas id="clock" width="900" height="900"></canvas>
-    <div id="remainText"></div>
-  </div>
-</div>
 
     <div class="right">
       <div class="task-box" id="taskText">じかんがくるまで まってね</div>
@@ -125,10 +130,10 @@ canvas {
       { start: "07:50", end: "08:10", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
       { start: "08:10", end: "08:20", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
       { start: "08:20", end: "08:30", task: "しゅっぱつのじゅんび", image: "images/shuppatsu.png", color: "#ffb36b" },
-      { start: "18:00", end: "19:00", task: "おふろ", image: "images/ofuro.png", color: "#8fd0ff" },
-      { start: "19:00", end: "20:00", task: "ごはん", image: "images/gohan.png", color: "#ff9e7a" },
-      { start: "20:15", end: "20:30", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
-      { start: "20:30", end: "20:50", task: "ねるじゅんび", image: "images/neru.png", color: "#9f8cff" }
+      { start: "18:00", end: "18:30", task: "ごはん", image: "images/gohan.png", color: "#ff9e7a" },
+      { start: "18:30", end: "19:00", task: "おふろ", image: "images/ofuro.png", color: "#8fd0ff" },
+      { start: "19:00", end: "19:20", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
+      { start: "19:20", end: "20:00", task: "ねるじゅんび", image: "images/neru.png", color: "#9f8cff" }
     ];
 
     const canvas = document.getElementById("clock");
@@ -248,24 +253,22 @@ canvas {
       ctx.fill();
     }
 
-function drawCenterText(item, nowMin) {
-  if (!item) return;
+    function updateRemain(item, nowMin) {
+      if (!item) {
+        remainText.textContent = "";
+        return;
+      }
 
-  const e = timeToMinutes(item.end);
-  const remain = Math.max(0, Math.ceil(e - nowMin));
-
-  ctx.fillStyle = item.color;
-  ctx.font = "bold 64px sans-serif";
-  ctx.textAlign = "center";
-
-  // ← これだけ残す（やること削除）
-  ctx.fillText(`あと ${remain} ふん`, 450, 460);
-}
+      const endMin = timeToMinutes(item.end);
+      const remain = Math.max(0, Math.ceil(endMin - nowMin));
+      remainText.textContent = `あと ${remain} ふん`;
+    }
 
     function updateRightPanel(item) {
       taskText.textContent = item ? item.task : "じかんがくるまで まってね";
 
       imageBox.innerHTML = "";
+
       if (item && item.image) {
         const img = document.createElement("img");
         img.src = item.image;
@@ -287,29 +290,18 @@ function drawCenterText(item, nowMin) {
       drawClockFace();
 
       if (item) {
-        const s = timeToMinutes(item.start);
-        const e = timeToMinutes(item.end);
+        const startMin = timeToMinutes(item.start);
+        const endMin = timeToMinutes(item.end);
 
-        drawArc(s, e, "#dfe8f5", 42);
-        drawArc(s, nowMin, item.color, 42);
+        drawArc(startMin, endMin, "#dfe8f5", 42);
+        drawArc(startMin, nowMin, item.color, 42);
       }
 
       drawHands(now);
-      drawCenterText(item, nowMin);
       updateRightPanel(item);
       updateRemain(item, nowMin);
     }
-function updateRemain(item, nowMin) {
-  if (!item) {
-    remainText.textContent = "";
-    return;
-  }
 
-  const e = timeToMinutes(item.end);
-  const remain = Math.max(0, Math.ceil(e - nowMin));
-
-  remainText.textContent = `あと ${remain} ふん`;
-}
     render();
     setInterval(render, 1000);
   </script>
