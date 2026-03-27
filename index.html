@@ -156,38 +156,87 @@
       return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
     }
 
-function getCurrentItem(nowMin) {
-  return schedule.find(item => {
-    const s = timeToMinutes(item.start);
-    const e = timeToMinutes(item.end);
-
-    // 通常の時間帯（同じ日で終わる）
-    if (s < e) {
-      return nowMin >= s && nowMin < e;
+    function getItemDuration(item) {
+      const s = timeToMinutes(item.start);
+      const e = timeToMinutes(item.end);
+      return e > s ? (e - s) : (1440 - s + e);
     }
 
-    // 日またぎの時間帯（例: 21:00 - 06:30）
-    return nowMin >= s || nowMin < e;
-  }) || null;
-}
+    function getElapsedMinutes(item, nowMin) {
+      const s = timeToMinutes(item.start);
+      const e = timeToMinutes(item.end);
 
-    function minuteToAngle(min) {
-      const hour12 = (min / 60) % 12;
-      return (hour12 / 12) * Math.PI * 2 - Math.PI / 2;
+      if (s < e) {
+        return nowMin - s;
+      }
+
+      // 日またぎ
+      if (nowMin >= s) {
+        return nowMin - s;
+      }
+      return (1440 - s) + nowMin;
     }
 
-    function drawArc(startMin, endMin, color, lineWidth) {
+    function getCurrentItem(nowMin) {
+      return schedule.find(item => {
+        const s = timeToMinutes(item.start);
+        const e = timeToMinutes(item.end);
+
+        // 通常
+        if (s < e) {
+          return nowMin >= s && nowMin < e;
+        }
+
+        // 日またぎ
+        return nowMin >= s || nowMin < e;
+      }) || null;
+    }
+
+    function clockMinuteToAngle(clockMin) {
+      return (clockMin / 720) * Math.PI * 2 - Math.PI / 2;
+    }
+
+    // 0〜1439分を12時間時計上の0〜719分へ変換
+    function toClockMinutes(dayMin) {
+      return ((dayMin % 720) + 720) % 720;
+    }
+
+    function drawArcSegment(startClockMin, spanMin, color, lineWidth) {
+      if (spanMin <= 0) return;
+
+      const radius = 300;
+      const start = startClockMin;
+      const end = startClockMin + spanMin;
+
       ctx.beginPath();
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
       ctx.lineCap = "round";
       ctx.arc(
-        450, 450, 300,
-        minuteToAngle(startMin),
-        minuteToAngle(endMin),
+        450,
+        450,
+        radius,
+        clockMinuteToAngle(start),
+        clockMinuteToAngle(end),
         false
       );
       ctx.stroke();
+    }
+
+    // 12時またぎでも自然に見えるように分割描画
+    function drawClockRange(startDayMin, spanMin, color, lineWidth) {
+      if (spanMin <= 0) return;
+
+      let startClockMin = toClockMinutes(startDayMin);
+      let remain = spanMin;
+
+      while (remain > 0) {
+        const availableToTop = 720 - startClockMin;
+        const chunk = Math.min(remain, availableToTop);
+        drawArcSegment(startClockMin, chunk, color, lineWidth);
+        remain -= chunk;
+        startClockMin = 0;
+      }
     }
 
     function drawClockFace() {
@@ -264,31 +313,18 @@ function getCurrentItem(nowMin) {
       ctx.fill();
     }
 
-function updateRemain(item, nowMin) {
-  if (!item) {
-    remainText.textContent = "";
-    return;
-  }
+    function updateRemain(item, nowMin) {
+      if (!item) {
+        remainText.textContent = "";
+        return;
+      }
 
-  const startMin = timeToMinutes(item.start);
-  const endMin = timeToMinutes(item.end);
+      const duration = getItemDuration(item);
+      const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+      const remain = Math.max(0, Math.ceil(duration - elapsed));
 
-  let remain;
-
-  if (startMin < endMin) {
-    // 通常
-    remain = Math.ceil(endMin - nowMin);
-  } else {
-    // 日またぎ
-    if (nowMin >= startMin) {
-      remain = Math.ceil((24 * 60 - nowMin) + endMin);
-    } else {
-      remain = Math.ceil(endMin - nowMin);
+      remainText.textContent = `あと ${remain} ふん`;
     }
-  }
-
-  remainText.textContent = `あと ${remain} ふん`;
-}
 
     function updateRightPanel(item) {
       taskText.textContent = item ? item.task : "じかんがくるまで まってね";
@@ -317,10 +353,14 @@ function updateRemain(item, nowMin) {
 
       if (item) {
         const startMin = timeToMinutes(item.start);
-        const endMin = timeToMinutes(item.end);
+        const duration = getItemDuration(item);
+        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
 
-        drawArc(startMin, endMin, "#dfe8f5", 42);
-        drawArc(startMin, nowMin, item.color, 42);
+        // 薄い帯：タスク全体
+        drawClockRange(startMin, duration, "#dfe8f5", 42);
+
+        // 濃い帯：経過分
+        drawClockRange(startMin, elapsed, item.color, 42);
       }
 
       drawHands(now);
