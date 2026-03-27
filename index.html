@@ -170,10 +170,10 @@
         return nowMin - s;
       }
 
-      // 日またぎ
       if (nowMin >= s) {
         return nowMin - s;
       }
+
       return (1440 - s) + nowMin;
     }
 
@@ -182,12 +182,10 @@
         const s = timeToMinutes(item.start);
         const e = timeToMinutes(item.end);
 
-        // 通常
         if (s < e) {
           return nowMin >= s && nowMin < e;
         }
 
-        // 日またぎ
         return nowMin >= s || nowMin < e;
       }) || null;
     }
@@ -196,15 +194,13 @@
       return (clockMin / 720) * Math.PI * 2 - Math.PI / 2;
     }
 
-    // 0〜1439分を12時間時計上の0〜719分へ変換
     function toClockMinutes(dayMin) {
       return ((dayMin % 720) + 720) % 720;
     }
 
-    function drawArcSegment(startClockMin, spanMin, color, lineWidth) {
+    function drawArcSegment(startClockMin, spanMin, color, lineWidth, radius) {
       if (spanMin <= 0) return;
 
-      const radius = 300;
       const start = startClockMin;
       const end = startClockMin + spanMin;
 
@@ -223,8 +219,7 @@
       ctx.stroke();
     }
 
-    // 12時またぎでも自然に見えるように分割描画
-    function drawClockRange(startDayMin, spanMin, color, lineWidth) {
+    function drawClockRange(startDayMin, spanMin, color, lineWidth, radius) {
       if (spanMin <= 0) return;
 
       let startClockMin = toClockMinutes(startDayMin);
@@ -233,7 +228,7 @@
       while (remain > 0) {
         const availableToTop = 720 - startClockMin;
         const chunk = Math.min(remain, availableToTop);
-        drawArcSegment(startClockMin, chunk, color, lineWidth);
+        drawArcSegment(startClockMin, chunk, color, lineWidth, radius);
         remain -= chunk;
         startClockMin = 0;
       }
@@ -244,19 +239,19 @@
 
       ctx.beginPath();
       ctx.fillStyle = "#fff";
-      ctx.arc(450, 450, 360, 0, Math.PI * 2);
+      ctx.arc(450, 450, 330, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.beginPath();
       ctx.lineWidth = 10;
       ctx.strokeStyle = "#ddd";
-      ctx.arc(450, 450, 360, 0, Math.PI * 2);
+      ctx.arc(450, 450, 330, 0, Math.PI * 2);
       ctx.stroke();
 
       for (let i = 1; i <= 12; i++) {
         const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-        const x = 450 + Math.cos(angle) * 285;
-        const y = 450 + Math.sin(angle) * 285;
+        const x = 450 + Math.cos(angle) * 260;
+        const y = 450 + Math.sin(angle) * 260;
         ctx.fillStyle = "#333";
         ctx.font = "bold 48px sans-serif";
         ctx.textAlign = "center";
@@ -266,12 +261,13 @@
 
       for (let i = 0; i < 60; i++) {
         const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
-        const outer = 340;
-        const inner = i % 5 === 0 ? 315 : 328;
+        const outer = 310;
+        const inner = i % 5 === 0 ? 285 : 298;
         const x1 = 450 + Math.cos(angle) * inner;
         const y1 = 450 + Math.sin(angle) * inner;
         const x2 = 450 + Math.cos(angle) * outer;
         const y2 = 450 + Math.sin(angle) * outer;
+
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -303,9 +299,9 @@
         ctx.stroke();
       }
 
-      hand(hourAngle, 160, 14, "#333");
-      hand(minuteAngle, 240, 10, "#444");
-      hand(secondAngle, 270, 4, "#e33");
+      hand(hourAngle, 150, 14, "#333");
+      hand(minuteAngle, 225, 10, "#444");
+      hand(secondAngle, 255, 4, "#e33");
 
       ctx.beginPath();
       ctx.fillStyle = "#333";
@@ -316,6 +312,7 @@
     function updateRemain(item, nowMin) {
       if (!item) {
         remainText.textContent = "";
+        remainText.style.color = "#333";
         return;
       }
 
@@ -324,14 +321,27 @@
       const remain = Math.max(0, Math.ceil(duration - elapsed));
 
       remainText.textContent = `あと ${remain} ふん`;
+      remainText.style.color = remain <= 5 ? "#d93025" : "#333";
     }
 
-    function updateRightPanel(item) {
-      taskText.textContent = item ? item.task : "じかんがくるまで まってね";
+    function updateRightPanel(item, nowMin) {
+      if (!item) {
+        taskText.textContent = "じかんがくるまで まってね";
+        taskText.style.color = "#333";
+        imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
+        return;
+      }
+
+      const duration = getItemDuration(item);
+      const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+      const remain = Math.max(0, Math.ceil(duration - elapsed));
+
+      taskText.textContent = item.task;
+      taskText.style.color = remain <= 5 ? "#d93025" : "#333";
 
       imageBox.innerHTML = "";
 
-      if (item && item.image) {
+      if (item.image) {
         const img = document.createElement("img");
         img.src = item.image;
         img.alt = item.task;
@@ -355,16 +365,19 @@
         const startMin = timeToMinutes(item.start);
         const duration = getItemDuration(item);
         const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+        const remain = Math.max(0, Math.ceil(duration - elapsed));
 
-        // 薄い帯：タスク全体
-        drawClockRange(startMin, duration, "#dfe8f5", 42);
+        const progressColor = remain <= 5 ? "#d93025" : item.color;
 
-        // 濃い帯：経過分
-        drawClockRange(startMin, elapsed, item.color, 42);
+        // 外側リング（全体時間）
+        drawClockRange(startMin, duration, "rgba(180, 180, 180, 0.35)", 24, 370);
+
+        // 内側リング（進行状況）
+        drawClockRange(startMin, elapsed, progressColor, 18, 340);
       }
 
       drawHands(now);
-      updateRightPanel(item);
+      updateRightPanel(item, nowMin);
       updateRemain(item, nowMin);
     }
 
