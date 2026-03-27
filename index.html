@@ -156,13 +156,20 @@
       return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
     }
 
-    function getCurrentItem(nowMin) {
-      return schedule.find(item => {
-        const s = timeToMinutes(item.start);
-        const e = timeToMinutes(item.end);
-        return nowMin >= s && nowMin < e;
-      }) || null;
+function getCurrentItem(nowMin) {
+  return schedule.find(item => {
+    const s = timeToMinutes(item.start);
+    const e = timeToMinutes(item.end);
+
+    // 通常の時間帯（同じ日で終わる）
+    if (s < e) {
+      return nowMin >= s && nowMin < e;
     }
+
+    // 日またぎの時間帯（例: 21:00 - 06:30）
+    return nowMin >= s || nowMin < e;
+  }) || null;
+}
 
     function minuteToAngle(min) {
       const hour12 = (min / 60) % 12;
