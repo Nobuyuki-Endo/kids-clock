@@ -125,26 +125,63 @@
   </div>
 
   <script>
-    const schedule = [
-      { start: "06:30", end: "06:40", task: "おきる", image: "images/okiru.png", color: "#f6c445" },
-      { start: "06:40", end: "07:00", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
-      { start: "07:00", end: "07:10", task: "おきがえ", image: "images/okigae.png", color: "#f6c445" },
-      { start: "07:10", end: "07:25", task: "てれびをみる", image: "images/tv.png", color: "#f6c445" },
-      { start: "07:25", end: "07:30", task: "しゅっぱつのじゅんび", image: "images/shuppatsu.png", color: "#ffb36b" },
-      { start: "07:30", end: "08:00", task: "がっこうにいく", image: "images/gakkou.png", color: "#ffb36b" },
-      { start: "18:00", end: "18:30", task: "おふろ", image: "images/ofuro.png", color: "#ff9e7a" },
-      { start: "19:00", end: "19:30", task: "ごはん", image: "images/gohan.png", color: "#8fd0ff" },
-      { start: "19:30", end: "20:15", task: "あそぶ", image: "images/asobu.png", color: "#8fd0ff" },
-      { start: "20:15", end: "20:30", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
-      { start: "20:30", end: "21:00", task: "おかたづけ", image: "images/okataduke.png", color: "#9f8cff" },
-      { start: "21:00", end: "06:30", task: "ねる", image: "images/neru.png", color: "#9f8cff" }
-    ];
+    const schedules = {
+      weekday: [
+        { start: "06:30", end: "06:40", task: "おきる", image: "images/okiru.png", color: "#f6c445" },
+        { start: "06:40", end: "07:00", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
+        { start: "07:00", end: "07:10", task: "おきがえ", image: "images/okigae.png", color: "#f6c445" },
+        { start: "07:10", end: "07:25", task: "てれびをみる", image: "images/tv.png", color: "#f6c445" },
+        { start: "07:25", end: "07:30", task: "しゅっぱつのじゅんび", image: "images/shuppatsu.png", color: "#ffb36b" },
+        { start: "07:30", end: "08:00", task: "がっこうにいく", image: "images/gakkou.png", color: "#ffb36b" },
+        { start: "18:00", end: "18:30", task: "おふろ", image: "images/ofuro.png", color: "#ff9e7a" },
+        { start: "19:00", end: "19:30", task: "ごはん", image: "images/gohan.png", color: "#8fd0ff" },
+        { start: "19:30", end: "20:15", task: "あそぶ", image: "images/asobu.png", color: "#8fd0ff" },
+        { start: "20:15", end: "20:30", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
+        { start: "20:30", end: "21:00", task: "おかたづけ", image: "images/okataduke.png", color: "#9f8cff" },
+        { start: "21:00", end: "06:30", task: "ねる", image: "images/neru.png", color: "#9f8cff" }
+      ],
+      saturday: [
+        { start: "07:30", end: "08:00", task: "おきる", image: "images/okiru.png", color: "#f6c445" },
+        { start: "08:00", end: "08:30", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
+        { start: "08:30", end: "09:00", task: "あそぶ", image: "images/asobu.png", color: "#8fd0ff" },
+        { start: "09:00", end: "10:00", task: "おでかけ", image: "images/odekake.png", color: "#ffb36b" },
+        { start: "18:00", end: "18:30", task: "おふろ", image: "images/ofuro.png", color: "#ff9e7a" },
+        { start: "19:00", end: "19:30", task: "ごはん", image: "images/gohan.png", color: "#8fd0ff" },
+        { start: "19:30", end: "20:30", task: "あそぶ", image: "images/asobu.png", color: "#8fd0ff" },
+        { start: "20:30", end: "21:00", task: "おかたづけ", image: "images/okataduke.png", color: "#9f8cff" },
+        { start: "21:00", end: "07:30", task: "ねる", image: "images/neru.png", color: "#9f8cff" }
+      ],
+      sunday: [
+        { start: "07:30", end: "08:00", task: "おきる", image: "images/okiru.png", color: "#f6c445" },
+        { start: "08:00", end: "08:30", task: "あさごはん", image: "images/asagohan.png", color: "#7cc8ff" },
+        { start: "08:30", end: "09:30", task: "ゆっくりすごす", image: "images/relax.png", color: "#8fd0ff" },
+        { start: "09:30", end: "10:30", task: "おでかけ", image: "images/odekake.png", color: "#ffb36b" },
+        { start: "18:00", end: "18:30", task: "おふろ", image: "images/ofuro.png", color: "#ff9e7a" },
+        { start: "19:00", end: "19:30", task: "ごはん", image: "images/gohan.png", color: "#8fd0ff" },
+        { start: "19:30", end: "20:00", task: "あしたのじゅんび", image: "images/junbi.png", color: "#7ee0a0" },
+        { start: "20:00", end: "20:30", task: "はみがき", image: "images/hamigaki.png", color: "#7ee0a0" },
+        { start: "20:30", end: "21:00", task: "おかたづけ", image: "images/okataduke.png", color: "#9f8cff" },
+        { start: "21:00", end: "07:30", task: "ねる", image: "images/neru.png", color: "#9f8cff" }
+      ]
+    };
 
     const canvas = document.getElementById("clock");
     const ctx = canvas.getContext("2d");
     const taskText = document.getElementById("taskText");
     const imageBox = document.getElementById("imageBox");
     const remainText = document.getElementById("remainText");
+
+    function getTodayScheduleType() {
+      const day = new Date().getDay(); // 0:日, 1-5:平日, 6:土
+      if (day === 6) return "saturday";
+      if (day === 0) return "sunday";
+      return "weekday";
+    }
+
+    function getTodaySchedule() {
+      const type = getTodayScheduleType();
+      return schedules[type] || [];
+    }
 
     function timeToMinutes(hhmm) {
       const [h, m] = hhmm.split(":").map(Number);
@@ -177,7 +214,7 @@
       return (1440 - s) + nowMin;
     }
 
-    function getCurrentItem(nowMin) {
+    function getCurrentItem(nowMin, schedule) {
       return schedule.find(item => {
         const s = timeToMinutes(item.start);
         const e = timeToMinutes(item.end);
@@ -201,9 +238,6 @@
     function drawArcSegment(startClockMin, spanMin, color, lineWidth, radius) {
       if (spanMin <= 0) return;
 
-      const start = startClockMin;
-      const end = startClockMin + spanMin;
-
       ctx.beginPath();
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
@@ -212,8 +246,8 @@
         450,
         450,
         radius,
-        clockMinuteToAngle(start),
-        clockMinuteToAngle(end),
+        clockMinuteToAngle(startClockMin),
+        clockMinuteToAngle(startClockMin + spanMin),
         false
       );
       ctx.stroke();
@@ -357,7 +391,8 @@
     function render() {
       const now = new Date();
       const nowMin = getNowMinutes();
-      const item = getCurrentItem(nowMin);
+      const schedule = getTodaySchedule();
+      const item = getCurrentItem(nowMin, schedule);
 
       drawClockFace();
 
