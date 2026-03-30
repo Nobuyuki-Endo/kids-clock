@@ -127,11 +127,11 @@
   <script>
     const GAS_URL = "YOUR_GAS_WEB_APP_URL";
 
-    let schedules = {
-      weekday: [],
-      saturday: [],
-      sunday: []
-    };
+let schedules = {
+  weekday: [],
+  saturday: [],
+  holiday: []
+};
 
     const canvas = document.getElementById("clock");
     const ctx = canvas.getContext("2d");
@@ -147,11 +147,11 @@
         }
         const data = await res.json();
 
-        schedules = {
-          weekday: Array.isArray(data.weekday) ? data.weekday : [],
-          saturday: Array.isArray(data.saturday) ? data.saturday : [],
-          sunday: Array.isArray(data.sunday) ? data.sunday : []
-        };
+schedules = {
+  weekday: Array.isArray(data.weekday) ? data.weekday : [],
+  saturday: Array.isArray(data.saturday) ? data.saturday : [],
+  holiday: Array.isArray(data.holiday) ? data.holiday : []
+};
       } catch (err) {
         console.error(err);
         taskText.textContent = "よみこみにしっぱい";
@@ -159,12 +159,12 @@
       }
     }
 
-    function getTodayScheduleType() {
-      const day = new Date().getDay();
-      if (day === 6) return "saturday";
-      if (day === 0) return "sunday";
-      return "weekday";
-    }
+function getTodayScheduleType() {
+  const day = new Date().getDay();
+  if (day === 6) return "saturday";
+  if (day === 0) return "holiday";
+  return "weekday";
+}
 
     function getTodaySchedule() {
       const type = getTodayScheduleType();
