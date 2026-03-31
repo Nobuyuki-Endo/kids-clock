@@ -14,80 +14,12 @@
       overflow: hidden;
     }
 
-.container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100vw;
-  height: 100vh;
-}
-
-/* スマホ縦向き */
-@media (max-width: 768px) and (orientation: portrait) {
-  .container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-
-  .left {
-    height: 50vh;
-    padding: 12px;
-  }
-
-  .right {
-    height: 50vh;
-    padding: 12px;
-    gap: 10px;
-  }
-
-  canvas {
-    width: min(90vw, calc(50vh - 80px));
-  }
-}
-
-/* スマホ横向き */
-@media (max-width: 768px) and (orientation: landscape) {
-  .container {
-    grid-template-columns: 42fr 58fr;
-    grid-template-rows: 1fr;
-  }
-
-  .left,
-  .right {
-    height: 100vh;
-    padding: 10px;
-  }
-
-  .right {
-    gap: 8px;
-    overflow: hidden;
-  }
-
-  canvas {
-    width: min(38vw, 70vh);
-  }
-
-  .task-box {
-    flex: 0 0 18%;
-    font-size: clamp(20px, 4vw, 40px);
-    padding: 12px;
-  }
-
-  .next-task-box {
-    flex: 0 0 10%;
-    font-size: clamp(12px, 2vw, 20px);
-    padding: 6px 10px;
-  }
-
-  .done-button {
-    padding: 10px 14px;
-    font-size: clamp(14px, 2.2vw, 24px);
-  }
-
-  #remainText {
-    font-size: clamp(14px, 2.4vw, 24px);
-    margin-top: 4px;
-  }
-}
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100vw;
+      height: 100vh;
+    }
 
     .left, .right {
       display: flex;
@@ -109,96 +41,29 @@
       position: relative;
     }
 
-.clock-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+    .clock-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-canvas {
-  width: min(56vw, 56vh);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  max-width: 100%;
-  max-height: 100%;
-}
+    canvas {
+      width: min(56vw, 56vh);
+      height: auto;
+      aspect-ratio: 1 / 1;
+      max-width: 100%;
+      max-height: 100%;
+    }
 
-/* ▼ スマホ用 */
-@media (max-width: 768px) {
-  canvas {
-    width: min(90vw, calc(50vh - 80px));
-  }
-}
-
-@media (max-width: 768px) and (orientation: landscape) {
-  .container {
-    grid-template-columns: 40fr 60fr;
-    grid-template-rows: 1fr;
-  }
-
-  .left,
-  .right {
-    height: 100vh;
-    padding: 8px;
-  }
-
-  .right {
-    gap: 8px;
-    justify-content: flex-start;
-    overflow-y: auto;
-  }
-
-  .task-box {
-    flex: 0 0 auto;
-    min-height: 72px;
-    padding: 10px 12px;
-    font-size: clamp(18px, 4vw, 34px);
-  }
-
-  .next-task-box {
-    flex: 0 0 auto;
-    min-height: 44px;
-    padding: 6px 10px;
-    font-size: clamp(12px, 2.2vw, 18px);
-  }
-
-  .image-box {
-    flex: 0 0 auto;
-    min-height: 120px;
-    max-height: 180px;
-  }
-
-  .image-box img {
-    max-width: 85%;
-    max-height: 85%;
-  }
-
-  .done-button {
-    flex: 0 0 auto;
-    min-height: 52px;
-    padding: 10px 14px;
-    font-size: clamp(14px, 2.5vw, 22px);
-  }
-
-  #remainText {
-    margin-top: 4px;
-    font-size: clamp(14px, 2.4vw, 22px);
-  }
-
-  canvas {
-    width: min(34vw, 52vh);
-  }
-}
-    
-#remainText {
-  margin-top: 8px;
-  font-size: clamp(16px, 4vw, 32px);
-  text-align: center;
-}
+    #remainText {
+      margin-top: 8px;
+      font-size: clamp(16px, 4vw, 32px);
+      text-align: center;
+    }
 
     .task-box {
       width: 100%;
@@ -250,12 +115,12 @@ canvas {
       object-fit: contain;
     }
 
-.fallback {
-  font-size: clamp(14px, 2.2vw, 24px);
-  color: #666;
-  text-align: center;
-  padding: 20px;
-}
+    .fallback {
+      font-size: clamp(14px, 2.2vw, 24px);
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
 
     .done-button {
       display: none;
@@ -276,6 +141,90 @@ canvas {
 
     .done-button:active {
       transform: translateY(1px);
+    }
+
+    /* スマホ縦向き */
+    @media (max-width: 768px) and (orientation: portrait) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .left {
+        height: 50vh;
+        padding: 12px;
+      }
+
+      .right {
+        height: 50vh;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      canvas {
+        width: min(90vw, calc(50vh - 80px));
+      }
+    }
+
+    /* スマホ横向き */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .container {
+        grid-template-columns: 40fr 60fr;
+        grid-template-rows: 1fr;
+      }
+
+      .left,
+      .right {
+        height: 100vh;
+        padding: 8px;
+      }
+
+      .right {
+        gap: 8px;
+        justify-content: flex-start;
+        overflow-y: auto;
+      }
+
+      canvas {
+        width: min(34vw, 52vh);
+      }
+
+      #remainText {
+        margin-top: 4px;
+        font-size: clamp(14px, 2.4vw, 22px);
+      }
+
+      .task-box {
+        flex: 0 0 auto;
+        min-height: 72px;
+        padding: 10px 12px;
+        font-size: clamp(18px, 4vw, 34px);
+      }
+
+      .next-task-box {
+        flex: 0 0 auto;
+        min-height: 44px;
+        padding: 6px 10px;
+        font-size: clamp(12px, 2.2vw, 18px);
+      }
+
+      .image-box {
+        flex: 0 0 auto;
+        min-height: 120px;
+        max-height: 180px;
+      }
+
+      .image-box img {
+        max-width: 85%;
+        max-height: 85%;
+      }
+
+      .done-button {
+        flex: 0 0 auto;
+        min-height: 52px;
+        padding: 10px 14px;
+        font-size: clamp(14px, 2.5vw, 22px);
+      }
     }
   </style>
 </head>
@@ -330,7 +279,6 @@ canvas {
           holiday: Array.isArray(data.holiday) ? data.holiday : []
         };
 
-        // スケジュール更新時、曜日が変わっていたら手動状態をリセット
         const currentType = getTodayScheduleType();
         if (manualScheduleType && manualScheduleType !== currentType) {
           manualTaskIndex = null;
@@ -395,7 +343,6 @@ canvas {
     function getCurrentContext(nowMin, schedule, scheduleType) {
       const autoIndex = getCurrentItemIndex(nowMin, schedule);
 
-      // 手動遷移中はそのタスクを優先
       if (
         manualTaskIndex !== null &&
         manualScheduleType === scheduleType &&
@@ -423,8 +370,6 @@ canvas {
         };
       }
 
-      // どのタスクにも一致しない場合:
-      // 直前タスクがあれば「時間超過」として保持し、できたボタンを出せるようにする
       const lastIndex = getLastPastItemIndex(nowMin, schedule);
       if (lastIndex >= 0) {
         return {
@@ -443,35 +388,31 @@ canvas {
       };
     }
 
-function getLastPastItemIndex(nowMin, schedule) {
-  if (!schedule.length) return -1;
+    function getLastPastItemIndex(nowMin, schedule) {
+      if (!schedule.length) return -1;
 
-  let bestIndex = -1;
-  let bestEnd = -1;
+      let bestIndex = -1;
+      let bestEnd = -1;
 
-  schedule.forEach((item, index) => {
-    const start = timeToMinutes(item.start);
-    const duration = getItemDuration(item);
-    const isOvernight = timeToMinutes(item.end) <= start;
+      schedule.forEach((item, index) => {
+        const start = timeToMinutes(item.start);
+        const duration = getItemDuration(item);
+        const isOvernight = timeToMinutes(item.end) <= start;
 
-    // 日またぎタスクは「その日の開始時刻より前」では
-    // 前日から続いている扱いになるので、
-    // その時間帯では「直前に終わったタスク候補」から外す
-    if (isOvernight && nowMin < start) {
-      return;
+        if (isOvernight && nowMin < start) {
+          return;
+        }
+
+        const end = start + duration;
+
+        if (nowMin >= end && end > bestEnd) {
+          bestEnd = end;
+          bestIndex = index;
+        }
+      });
+
+      return bestIndex;
     }
-
-    const end = start + duration;
-
-    // nowMin 以降のタスクは除外
-    if (nowMin >= end && end > bestEnd) {
-      bestEnd = end;
-      bestIndex = index;
-    }
-  });
-
-  return bestIndex;
-}
 
     function getNextTask(schedule, index) {
       if (!schedule.length || index < 0) return null;
