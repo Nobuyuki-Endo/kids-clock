@@ -134,6 +134,66 @@ canvas {
   }
 }
 
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    grid-template-columns: 40fr 60fr;
+    grid-template-rows: 1fr;
+  }
+
+  .left,
+  .right {
+    height: 100vh;
+    padding: 8px;
+  }
+
+  .right {
+    gap: 8px;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .task-box {
+    flex: 0 0 auto;
+    min-height: 72px;
+    padding: 10px 12px;
+    font-size: clamp(18px, 4vw, 34px);
+  }
+
+  .next-task-box {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: clamp(12px, 2.2vw, 18px);
+  }
+
+  .image-box {
+    flex: 0 0 auto;
+    min-height: 120px;
+    max-height: 180px;
+  }
+
+  .image-box img {
+    max-width: 85%;
+    max-height: 85%;
+  }
+
+  .done-button {
+    flex: 0 0 auto;
+    min-height: 52px;
+    padding: 10px 14px;
+    font-size: clamp(14px, 2.5vw, 22px);
+  }
+
+  #remainText {
+    margin-top: 4px;
+    font-size: clamp(14px, 2.4vw, 22px);
+  }
+
+  canvas {
+    width: min(34vw, 52vh);
+  }
+}
+    
 #remainText {
   margin-top: 8px;
   font-size: clamp(16px, 4vw, 32px);
