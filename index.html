@@ -331,29 +331,35 @@ canvas {
       };
     }
 
-    function getLastPastItemIndex(nowMin, schedule) {
-      if (!schedule.length) return -1;
+function getLastPastItemIndex(nowMin, schedule) {
+  if (!schedule.length) return -1;
 
-      const expanded = schedule.map((item, index) => {
-        const start = timeToMinutes(item.start);
-        const duration = getItemDuration(item);
-        let end = start + duration;
+  let bestIndex = -1;
+  let bestEnd = -1;
 
-        // 日またぎ対応のため、現在時刻も比較しやすい形に補正
-        let now = nowMin;
-        if (end > 1440 && now < start) {
-          now += 1440;
-        }
+  schedule.forEach((item, index) => {
+    const start = timeToMinutes(item.start);
+    const duration = getItemDuration(item);
+    const isOvernight = timeToMinutes(item.end) <= start;
 
-        return { index, start, end, now };
-      });
-
-      const pastItems = expanded.filter(x => x.now >= x.end);
-      if (!pastItems.length) return -1;
-
-      pastItems.sort((a, b) => b.end - a.end);
-      return pastItems[0].index;
+    // 日またぎタスクは「その日の開始時刻より前」では
+    // 前日から続いている扱いになるので、
+    // その時間帯では「直前に終わったタスク候補」から外す
+    if (isOvernight && nowMin < start) {
+      return;
     }
+
+    const end = start + duration;
+
+    // nowMin 以降のタスクは除外
+    if (nowMin >= end && end > bestEnd) {
+      bestEnd = end;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
+}
 
     function getNextTask(schedule, index) {
       if (!schedule.length || index < 0) return null;
