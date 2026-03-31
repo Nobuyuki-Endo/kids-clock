@@ -21,8 +21,8 @@
   height: 100vh;
 }
 
-/* ▼ スマホ用 */
-@media (max-width: 768px) {
+/* スマホ縦向き */
+@media (max-width: 768px) and (orientation: portrait) {
   .container {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr;
@@ -30,10 +30,62 @@
 
   .left {
     height: 50vh;
+    padding: 12px;
   }
 
   .right {
     height: 50vh;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  canvas {
+    width: min(90vw, calc(50vh - 80px));
+  }
+}
+
+/* スマホ横向き */
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    grid-template-columns: 42fr 58fr;
+    grid-template-rows: 1fr;
+  }
+
+  .left,
+  .right {
+    height: 100vh;
+    padding: 10px;
+  }
+
+  .right {
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  canvas {
+    width: min(38vw, 70vh);
+  }
+
+  .task-box {
+    flex: 0 0 18%;
+    font-size: clamp(20px, 4vw, 40px);
+    padding: 12px;
+  }
+
+  .next-task-box {
+    flex: 0 0 10%;
+    font-size: clamp(12px, 2vw, 20px);
+    padding: 6px 10px;
+  }
+
+  .done-button {
+    padding: 10px 14px;
+    font-size: clamp(14px, 2.2vw, 24px);
+  }
+
+  #remainText {
+    font-size: clamp(14px, 2.4vw, 24px);
+    margin-top: 4px;
   }
 }
 
