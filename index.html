@@ -37,7 +37,8 @@
       flex-direction: column;
       background: #eef6ff;
       padding: 24px;
-      gap: 20px;
+      gap: 16px;
+      position: relative;
     }
 
     .clock-wrapper {
@@ -68,7 +69,7 @@
 
     .task-box {
       width: 100%;
-      flex: 0 0 26%;
+      flex: 0 0 22%;
       background: white;
       border-radius: 24px;
       display: flex;
@@ -81,6 +82,22 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     }
 
+    .next-task-box {
+      width: 100%;
+      flex: 0 0 10%;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2vw;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 16px;
+      color: #555;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
     .image-box {
       width: 100%;
       flex: 1;
@@ -91,6 +108,7 @@
       justify-content: center;
       overflow: hidden;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
     }
 
     .image-box img {
@@ -105,6 +123,27 @@
       text-align: center;
       padding: 20px;
     }
+
+    .done-button {
+      display: none;
+      width: 100%;
+      border: none;
+      border-radius: 20px;
+      padding: 18px 20px;
+      font-size: 3vw;
+      font-weight: bold;
+      background: #4caf50;
+      color: white;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .done-button.show {
+      display: block;
+    }
+
+    .done-button:active {
+      transform: translateY(1px);
+    }
   </style>
 </head>
 <body>
@@ -118,57 +157,69 @@
 
     <div class="right">
       <div class="task-box" id="taskText">よみこみちゅう</div>
+      <div class="next-task-box" id="nextTaskText">つぎ：---</div>
       <div class="image-box" id="imageBox">
         <div class="fallback">画像をここに表示</div>
       </div>
+      <button class="done-button" id="doneButton">できた</button>
     </div>
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzu0Wf2Dj3BrkzIndCZo9WQL_SOdO4_DCm0i3rafChA7H22bW9Kmewk_nDHCkYlAUFG/exec";
+    const GAS_URL = "YOUR_GAS_WEB_APP_URL";
 
-let schedules = {
-  weekday: [],
-  saturday: [],
-  holiday: []
-};
+    let schedules = {
+      weekday: [],
+      saturday: [],
+      holiday: []
+    };
 
     const canvas = document.getElementById("clock");
     const ctx = canvas.getContext("2d");
     const taskText = document.getElementById("taskText");
+    const nextTaskText = document.getElementById("nextTaskText");
     const imageBox = document.getElementById("imageBox");
     const remainText = document.getElementById("remainText");
+    const doneButton = document.getElementById("doneButton");
+
+    let manualTaskIndex = null;
+    let manualScheduleType = null;
 
     async function loadSchedules() {
       try {
         const res = await fetch(GAS_URL + "?t=" + Date.now());
-        if (!res.ok) {
-          throw new Error("Failed to fetch schedule");
-        }
-        const data = await res.json();
+        if (!res.ok) throw new Error("Failed to fetch schedule");
 
-schedules = {
-  weekday: Array.isArray(data.weekday) ? data.weekday : [],
-  saturday: Array.isArray(data.saturday) ? data.saturday : [],
-  holiday: Array.isArray(data.holiday) ? data.holiday : []
-};
+        const data = await res.json();
+        schedules = {
+          weekday: Array.isArray(data.weekday) ? data.weekday : [],
+          saturday: Array.isArray(data.saturday) ? data.saturday : [],
+          holiday: Array.isArray(data.holiday) ? data.holiday : []
+        };
+
+        // スケジュール更新時、曜日が変わっていたら手動状態をリセット
+        const currentType = getTodayScheduleType();
+        if (manualScheduleType && manualScheduleType !== currentType) {
+          manualTaskIndex = null;
+          manualScheduleType = null;
+        }
       } catch (err) {
         console.error(err);
         taskText.textContent = "よみこみにしっぱい";
+        nextTaskText.textContent = "つぎ：---";
         imageBox.innerHTML = '<div class="fallback">スケジュール取得に失敗しました</div>';
       }
     }
 
-function getTodayScheduleType() {
-  const day = new Date().getDay();
-  if (day === 6) return "saturday";
-  if (day === 0) return "holiday";
-  return "weekday";
-}
+    function getTodayScheduleType() {
+      const day = new Date().getDay();
+      if (day === 6) return "saturday";
+      if (day === 0) return "holiday";
+      return "weekday";
+    }
 
     function getTodaySchedule() {
-      const type = getTodayScheduleType();
-      return schedules[type] || [];
+      return schedules[getTodayScheduleType()] || [];
     }
 
     function timeToMinutes(hhmm) {
@@ -191,17 +242,13 @@ function getTodayScheduleType() {
       const s = timeToMinutes(item.start);
       const e = timeToMinutes(item.end);
 
-      if (s < e) {
-        return nowMin - s;
-      }
-      if (nowMin >= s) {
-        return nowMin - s;
-      }
+      if (s < e) return nowMin - s;
+      if (nowMin >= s) return nowMin - s;
       return (1440 - s) + nowMin;
     }
 
-    function getCurrentItem(nowMin, schedule) {
-      return schedule.find(item => {
+    function getCurrentItemIndex(nowMin, schedule) {
+      return schedule.findIndex(item => {
         const s = timeToMinutes(item.start);
         const e = timeToMinutes(item.end);
 
@@ -209,7 +256,88 @@ function getTodayScheduleType() {
           return nowMin >= s && nowMin < e;
         }
         return nowMin >= s || nowMin < e;
-      }) || null;
+      });
+    }
+
+    function getCurrentContext(nowMin, schedule, scheduleType) {
+      const autoIndex = getCurrentItemIndex(nowMin, schedule);
+
+      // 手動遷移中はそのタスクを優先
+      if (
+        manualTaskIndex !== null &&
+        manualScheduleType === scheduleType &&
+        schedule[manualTaskIndex]
+      ) {
+        return {
+          item: schedule[manualTaskIndex],
+          index: manualTaskIndex,
+          isManual: true,
+          isOverdue: false
+        };
+      }
+
+      if (autoIndex >= 0) {
+        const item = schedule[autoIndex];
+        const duration = getItemDuration(item);
+        const elapsed = Math.max(0, getElapsedMinutes(item, nowMin));
+        const remain = duration - elapsed;
+
+        return {
+          item,
+          index: autoIndex,
+          isManual: false,
+          isOverdue: remain <= 0
+        };
+      }
+
+      // どのタスクにも一致しない場合:
+      // 直前タスクがあれば「時間超過」として保持し、できたボタンを出せるようにする
+      const lastIndex = getLastPastItemIndex(nowMin, schedule);
+      if (lastIndex >= 0) {
+        return {
+          item: schedule[lastIndex],
+          index: lastIndex,
+          isManual: false,
+          isOverdue: true
+        };
+      }
+
+      return {
+        item: null,
+        index: -1,
+        isManual: false,
+        isOverdue: false
+      };
+    }
+
+    function getLastPastItemIndex(nowMin, schedule) {
+      if (!schedule.length) return -1;
+
+      const expanded = schedule.map((item, index) => {
+        const start = timeToMinutes(item.start);
+        const duration = getItemDuration(item);
+        let end = start + duration;
+
+        // 日またぎ対応のため、現在時刻も比較しやすい形に補正
+        let now = nowMin;
+        if (end > 1440 && now < start) {
+          now += 1440;
+        }
+
+        return { index, start, end, now };
+      });
+
+      const pastItems = expanded.filter(x => x.now >= x.end);
+      if (!pastItems.length) return -1;
+
+      pastItems.sort((a, b) => b.end - a.end);
+      return pastItems[0].index;
+    }
+
+    function getNextTask(schedule, index) {
+      if (!schedule.length || index < 0) return null;
+      const nextIndex = (index + 1) % schedule.length;
+      return schedule[nextIndex] || null;
     }
 
     function clockMinuteToAngle(clockMin) {
@@ -328,9 +456,23 @@ function getTodayScheduleType() {
       ctx.fill();
     }
 
-    function updateRemain(item, nowMin) {
+    function updateRemain(context, nowMin) {
+      const item = context.item;
+
       if (!item) {
         remainText.textContent = "";
+        remainText.style.color = "#333";
+        return;
+      }
+
+      if (context.isOverdue) {
+        remainText.textContent = "おわったよ";
+        remainText.style.color = "#d93025";
+        return;
+      }
+
+      if (context.isManual) {
+        remainText.textContent = "つぎにすすめるよ";
         remainText.style.color = "#333";
         return;
       }
@@ -343,23 +485,35 @@ function getTodayScheduleType() {
       remainText.style.color = remain <= 5 ? "#d93025" : "#333";
     }
 
-    function updateRightPanel(item, nowMin) {
+    function updateRightPanel(context, nowMin, nextItem) {
+      const item = context.item;
+
       if (!item) {
         taskText.textContent = "じかんがくるまで まってね";
         taskText.style.color = "#333";
+        nextTaskText.textContent = "つぎ：---";
         imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
+        doneButton.classList.remove("show");
         return;
       }
 
-      const duration = getItemDuration(item);
-      const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
-      const remain = Math.max(0, Math.ceil(duration - elapsed));
+      let mainColor = "#333";
+
+      if (context.isOverdue) {
+        mainColor = "#d93025";
+      } else if (!context.isManual) {
+        const duration = getItemDuration(item);
+        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+        const remain = Math.max(0, Math.ceil(duration - elapsed));
+        if (remain <= 5) mainColor = "#d93025";
+      }
 
       taskText.textContent = item.task;
-      taskText.style.color = remain <= 5 ? "#d93025" : "#333";
+      taskText.style.color = mainColor;
+
+      nextTaskText.textContent = nextItem ? `つぎ：${nextItem.task}` : "つぎ：---";
 
       imageBox.innerHTML = "";
-
       if (item.image) {
         const img = document.createElement("img");
         img.src = item.image;
@@ -371,41 +525,82 @@ function getTodayScheduleType() {
       } else {
         imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
       }
+
+      if (context.isOverdue) {
+        doneButton.classList.add("show");
+      } else {
+        doneButton.classList.remove("show");
+      }
+    }
+
+    function drawTaskRings(context, nowMin) {
+      const item = context.item;
+      if (!item) return;
+
+      const startMin = timeToMinutes(item.start);
+      const duration = getItemDuration(item);
+
+      let progressSpan = 0;
+      let progressColor = item.color;
+
+      if (context.isOverdue) {
+        progressSpan = duration;
+        progressColor = "#d93025";
+      } else if (context.isManual) {
+        progressSpan = duration;
+        progressColor = item.color;
+      } else {
+        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+        const remain = Math.max(0, Math.ceil(duration - elapsed));
+        progressSpan = elapsed;
+        progressColor = remain <= 5 ? "#d93025" : item.color;
+      }
+
+      drawClockRange(startMin, duration, "rgba(180, 180, 180, 0.35)", 24, 370);
+      drawClockRange(startMin, progressSpan, progressColor, 18, 340);
     }
 
     function render() {
       const now = new Date();
       const nowMin = getNowMinutes();
+      const scheduleType = getTodayScheduleType();
       const schedule = getTodaySchedule();
-      const item = getCurrentItem(nowMin, schedule);
+
+      const context = getCurrentContext(nowMin, schedule, scheduleType);
+      const nextItem = getNextTask(schedule, context.index);
 
       drawClockFace();
-
-      if (item) {
-        const startMin = timeToMinutes(item.start);
-        const duration = getItemDuration(item);
-        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
-        const remain = Math.max(0, Math.ceil(duration - elapsed));
-        const progressColor = remain <= 5 ? "#d93025" : item.color;
-
-        drawClockRange(startMin, duration, "rgba(180, 180, 180, 0.35)", 24, 370);
-        drawClockRange(startMin, elapsed, progressColor, 18, 340);
-      }
-
+      drawTaskRings(context, nowMin);
       drawHands(now);
-      updateRightPanel(item, nowMin);
-      updateRemain(item, nowMin);
+      updateRightPanel(context, nowMin, nextItem);
+      updateRemain(context, nowMin);
     }
+
+    function goToNextTask() {
+      const scheduleType = getTodayScheduleType();
+      const schedule = getTodaySchedule();
+      if (!schedule.length) return;
+
+      const nowMin = getNowMinutes();
+      const context = getCurrentContext(nowMin, schedule, scheduleType);
+      if (context.index < 0) return;
+
+      manualTaskIndex = (context.index + 1) % schedule.length;
+      manualScheduleType = scheduleType;
+      render();
+    }
+
+    doneButton.addEventListener("click", goToNextTask);
 
     async function init() {
       await loadSchedules();
       render();
+
       setInterval(render, 1000);
 
-      // 5分ごとに再読込
       setInterval(async () => {
         await loadSchedules();
-      }, 5 * 60 * 1000);
+      }, 60 * 1000);
     }
 
     init();
