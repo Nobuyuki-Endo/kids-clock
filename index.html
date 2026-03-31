@@ -6,245 +6,240 @@
   <title>こども時間サイネージ</title>
   <style>
     html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  font-family: sans-serif;
-  background: #f7f7f7;
-  overflow: hidden;
-}
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      font-family: sans-serif;
+      background: #f7f7f7;
+      overflow: hidden;
+    }
 
-.container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100vw;
-  height: 100vh;
-}
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100vw;
+      height: 100vh;
+    }
 
-.left, .right {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
+    .left, .right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
 
-.left {
-  background: #ffffff;
-  padding: clamp(8px, 2vw, 24px);
-}
+    .left {
+      background: #ffffff;
+      padding: clamp(8px, 2vw, 24px);
+    }
 
-.right {
-  flex-direction: column;
-  background: #eef6ff;
-  padding: clamp(8px, 2vw, 24px);
-  gap: clamp(8px, 2vw, 16px);
-  position: relative;
-}
+    .right {
+      flex-direction: column;
+      background: #eef6ff;
+      padding: clamp(8px, 2vw, 24px);
+      gap: clamp(8px, 2vw, 16px);
+      position: relative;
+    }
 
-/* 時計 */
-.clock-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+    .clock-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-canvas {
-  width: min(56vw, 56vh);
-  height: auto;
-  aspect-ratio: 1 / 1;
-  max-width: 100%;
-  max-height: 100%;
-}
+    canvas {
+      width: min(56vw, 56vh);
+      height: auto;
+      aspect-ratio: 1 / 1;
+      max-width: 100%;
+      max-height: 100%;
+    }
 
-#remainText {
-  margin-top: 8px;
-  font-size: clamp(16px, 4vw, 40px);
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
+    #remainText {
+      margin-top: 8px;
+      font-size: clamp(16px, 4vw, 40px);
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+    }
 
-/* 右側UI */
-.task-box {
-  width: 100%;
-  flex: 0 0 22%;
-  background: white;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(24px, 6vw, 64px);
-  font-weight: bold;
-  text-align: center;
-  padding: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
+    .task-box {
+      width: 100%;
+      flex: 0 0 22%;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(24px, 6vw, 64px);
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
 
-.next-task-box {
-  width: 100%;
-  flex: 0 0 10%;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(14px, 2.5vw, 28px);
-  font-weight: bold;
-  text-align: center;
-  padding: 10px 16px;
-  color: #555;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+    .next-task-box {
+      width: 100%;
+      flex: 0 0 10%;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(14px, 2.5vw, 28px);
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 16px;
+      color: #555;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
 
-.image-box {
-  width: 100%;
-  flex: 1;
-  background: white;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  position: relative;
-  padding-bottom: 84px; /* ボタン分の余白 */
-  box-sizing: border-box;
-}
+    .image-box {
+      width: 100%;
+      flex: 1;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
+      padding-bottom: 84px;
+      box-sizing: border-box;
+    }
 
-.image-box img {
-  max-width: 100%;
-  max-height: calc(100% - 20px);
-  object-fit: contain;
-}
+    .image-box img {
+      max-width: 100%;
+      max-height: calc(100% - 20px);
+      object-fit: contain;
+    }
 
+    .fallback {
+      font-size: clamp(14px, 2.2vw, 24px);
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
 
-.fallback {
-  font-size: clamp(14px, 2.2vw, 24px);
-  color: #666;
-  text-align: center;
-  padding: 20px;
-}
+    .done-button {
+      display: none;
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      width: auto;
+      border: none;
+      border-radius: 20px;
+      padding: 18px 20px;
+      font-size: clamp(16px, 3vw, 36px);
+      font-weight: bold;
+      background: #4caf50;
+      color: white;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
 
-/* ボタン（位置を固定してレイアウト崩れ防止） */
-.done-button {
-  display: none;
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
-  width: auto;
-  border: none;
-  border-radius: 20px;
-  padding: 18px 20px;
-  font-size: clamp(16px, 3vw, 36px);
-  font-weight: bold;
-  background: #4caf50;
-  color: white;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
+    .done-button.show {
+      display: block;
+    }
 
-.done-button:active {
-  transform: translateY(1px);
-}
+    .done-button:active {
+      transform: translateY(1px);
+    }
 
-/* =========================
-   ▼ スマホ縦
-========================= */
-@media (max-width: 768px) and (orientation: portrait) {
-  .container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
+    /* スマホ縦 */
+    @media (max-width: 768px) and (orientation: portrait) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
 
-  .left {
-    height: 50vh;
-  }
+      .left {
+        height: 50vh;
+      }
 
-  .right {
-    height: 50vh;
-    overflow-y: auto;
-  }
+      .right {
+        height: 50vh;
+        overflow-y: auto;
+      }
 
-  canvas {
-    width: min(90vw, calc(50vh - 80px));
-  }
-}
+      canvas {
+        width: min(90vw, calc(50vh - 80px));
+      }
+    }
 
-/* =========================
-   ▼ スマホ横（ここが今回の本命）
-========================= */
-@media (max-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+    /* スマホ横 */
+    @media (max-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+      html, body {
+        overflow: auto;
+      }
 
-  html, body {
-    overflow: auto;
-  }
+      .container {
+        grid-template-columns: 40fr 60fr;
+      }
 
-  .container {
-    grid-template-columns: 40fr 60fr;
-  }
+      .left,
+      .right {
+        height: 100vh;
+        padding: 8px;
+      }
 
-  .left,
-  .right {
-    height: 100vh;
-    padding: 8px;
-  }
+      .right {
+        gap: 8px;
+        justify-content: flex-start;
+        overflow-y: auto;
+      }
 
-  .right {
-    gap: 8px;
-    justify-content: flex-start;
-    overflow-y: auto;
-  }
+      .task-box {
+        flex: 0 0 auto;
+        min-height: 60px;
+        max-height: 80px;
+        padding: 8px 10px;
+        font-size: clamp(18px, 3vw, 28px);
+      }
 
-  .task-box {
-    flex: 0 0 auto;
-    min-height: 60px;
-    max-height: 80px;
-    padding: 8px 10px;
-    font-size: clamp(18px, 3vw, 28px);
-  }
+      .next-task-box {
+        flex: 0 0 auto;
+        min-height: 36px;
+        max-height: 48px;
+        padding: 4px 10px;
+        font-size: clamp(12px, 2vw, 18px);
+      }
 
-  .next-task-box {
-    flex: 0 0 auto;
-    min-height: 36px;
-    max-height: 48px;
-    padding: 4px 10px;
-    font-size: clamp(12px, 2vw, 18px);
-  }
+      .image-box {
+        flex: 0 0 auto;
+        height: 110px;
+        min-height: 110px;
+        max-height: 110px;
+        padding-bottom: 56px;
+      }
 
-  .image-box {
-    flex: 0 0 auto;
-    height: 110px;
-    min-height: 110px;
-    max-height: 110px;
-    padding-bottom: 56px;
-  }
+      .image-box img {
+        max-width: 72%;
+        max-height: 60%;
+        object-fit: contain;
+      }
 
-  .image-box img {
-    max-width: 72%;
-    max-height: 60%;
-    object-fit: contain;
-  }
+      .done-button {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        padding: 8px 12px;
+        font-size: clamp(14px, 2vw, 18px);
+      }
 
-  .done-button {
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    padding: 8px 12px;
-    font-size: clamp(14px, 2vw, 18px);
-  }
+      #remainText {
+        font-size: clamp(12px, 2vw, 20px);
+      }
 
-  #remainText {
-    font-size: clamp(12px, 2vw, 20px);
-  }
-
-  canvas {
-    width: min(30vw, 50vh);
-  }
-}
+      canvas {
+        width: min(30vw, 50vh);
+      }
+    }
   </style>
 </head>
 <body>
@@ -259,8 +254,9 @@ canvas {
     <div class="right">
       <div class="task-box" id="taskText">よみこみちゅう</div>
       <div class="next-task-box" id="nextTaskText">つぎ：---</div>
+
       <div class="image-box" id="imageBox">
-        <div class="fallback">画像をここに表示</div>
+        <div class="fallback" id="imageFallback">画像をここに表示</div>
         <button class="done-button" id="doneButton">できた</button>
       </div>
     </div>
@@ -280,6 +276,7 @@ canvas {
     const taskText = document.getElementById("taskText");
     const nextTaskText = document.getElementById("nextTaskText");
     const imageBox = document.getElementById("imageBox");
+    const imageFallback = document.getElementById("imageFallback");
     const remainText = document.getElementById("remainText");
     const doneButton = document.getElementById("doneButton");
 
@@ -307,7 +304,12 @@ canvas {
         console.error(err);
         taskText.textContent = "よみこみにしっぱい";
         nextTaskText.textContent = "つぎ：---";
-        imageBox.innerHTML = '<div class="fallback">スケジュール取得に失敗しました</div>';
+
+        const existingImg = imageBox.querySelector("img");
+        if (existingImg) existingImg.remove();
+        imageFallback.textContent = "スケジュール取得に失敗しました";
+        imageFallback.style.display = "block";
+        doneButton.classList.remove("show");
       }
     }
 
@@ -352,9 +354,7 @@ canvas {
         const s = timeToMinutes(item.start);
         const e = timeToMinutes(item.end);
 
-        if (s < e) {
-          return nowMin >= s && nowMin < e;
-        }
+        if (s < e) return nowMin >= s && nowMin < e;
         return nowMin >= s || nowMin < e;
       });
     }
@@ -418,9 +418,7 @@ canvas {
         const duration = getItemDuration(item);
         const isOvernight = timeToMinutes(item.end) <= start;
 
-        if (isOvernight && nowMin < start) {
-          return;
-        }
+        if (isOvernight && nowMin < start) return;
 
         const end = start + duration;
 
@@ -591,7 +589,12 @@ canvas {
         taskText.textContent = "じかんがくるまで まってね";
         taskText.style.color = "#333";
         nextTaskText.textContent = "つぎ：---";
-        imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
+
+        const existingImg = imageBox.querySelector("img");
+        if (existingImg) existingImg.remove();
+
+        imageFallback.textContent = "画像をここに表示";
+        imageFallback.style.display = "block";
         doneButton.classList.remove("show");
         return;
       }
@@ -612,17 +615,24 @@ canvas {
 
       nextTaskText.textContent = nextItem ? `つぎ：${nextItem.task}` : "つぎ：---";
 
-      imageBox.innerHTML = "";
+      const existingImg = imageBox.querySelector("img");
+      if (existingImg) existingImg.remove();
+
       if (item.image) {
         const img = document.createElement("img");
         img.src = item.image;
         img.alt = item.task;
+
         img.onerror = () => {
-          imageBox.innerHTML = '<div class="fallback">画像が見つかりません</div>';
+          imageFallback.textContent = "画像が見つかりません";
+          imageFallback.style.display = "block";
         };
-        imageBox.appendChild(img);
+
+        imageBox.insertBefore(img, doneButton);
+        imageFallback.style.display = "none";
       } else {
-        imageBox.innerHTML = '<div class="fallback">画像をここに表示</div>';
+        imageFallback.textContent = "画像をここに表示";
+        imageFallback.style.display = "block";
       }
 
       if (context.isOverdue) {
