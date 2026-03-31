@@ -110,13 +110,17 @@ canvas {
   justify-content: center;
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  padding-bottom: 84px; /* ボタン分の余白 */
+  box-sizing: border-box;
 }
 
 .image-box img {
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 100%;
+  max-height: calc(100% - 20px);
   object-fit: contain;
 }
+
 
 .fallback {
   font-size: clamp(14px, 2.2vw, 24px);
@@ -127,9 +131,12 @@ canvas {
 
 /* ボタン（位置を固定してレイアウト崩れ防止） */
 .done-button {
-  position: sticky;
-  bottom: 0;
-  width: 100%;
+  display: none;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: auto;
   border: none;
   border-radius: 20px;
   padding: 18px 20px;
@@ -138,7 +145,6 @@ canvas {
   background: #4caf50;
   color: white;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  margin-top: 8px;
 }
 
 .done-button:active {
@@ -211,19 +217,24 @@ canvas {
 
   .image-box {
     flex: 0 0 auto;
-    height: 90px;
-    max-height: 90px;
+    height: 110px;
+    min-height: 110px;
+    max-height: 110px;
+    padding-bottom: 56px;
   }
 
   .image-box img {
-    max-width: 75%;
-    max-height: 75%;
+    max-width: 72%;
+    max-height: 60%;
+    object-fit: contain;
   }
 
   .done-button {
-    min-height: 44px;
-    padding: 10px;
-    font-size: clamp(14px, 2vw, 20px);
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 8px 12px;
+    font-size: clamp(14px, 2vw, 18px);
   }
 
   #remainText {
@@ -250,8 +261,8 @@ canvas {
       <div class="next-task-box" id="nextTaskText">つぎ：---</div>
       <div class="image-box" id="imageBox">
         <div class="fallback">画像をここに表示</div>
+        <button class="done-button" id="doneButton">できた</button>
       </div>
-      <button class="done-button" id="doneButton">できた</button>
     </div>
   </div>
 
