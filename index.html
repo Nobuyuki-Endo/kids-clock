@@ -109,8 +109,11 @@
       overflow: hidden;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       position: relative;
-      padding-bottom: 84px;
       box-sizing: border-box;
+    }
+
+    .image-box.with-button {
+      padding-bottom: 84px;
     }
 
     .image-box img {
@@ -215,6 +218,9 @@
         height: 110px;
         min-height: 110px;
         max-height: 110px;
+      }
+
+      .image-box.with-button {
         padding-bottom: 56px;
       }
 
@@ -283,6 +289,13 @@
     let manualTaskIndex = null;
     let manualScheduleType = null;
 
+    let lockedOverdueIndex = null;
+    let lockedOverdueScheduleType = null;
+
+    let previousAutoIndex = null;
+    let previousScheduleType = null;
+    let hasRenderedOnce = false;
+
     async function loadSchedules() {
       try {
         const res = await fetch(GAS_URL + "?t=" + Date.now());
@@ -300,6 +313,10 @@
           manualTaskIndex = null;
           manualScheduleType = null;
         }
+        if (lockedOverdueScheduleType && lockedOverdueScheduleType !== currentType) {
+          lockedOverdueIndex = null;
+          lockedOverdueScheduleType = null;
+        }
       } catch (err) {
         console.error(err);
         taskText.textContent = "よみこみにしっぱい";
@@ -307,8 +324,10 @@
 
         const existingImg = imageBox.querySelector("img");
         if (existingImg) existingImg.remove();
+
         imageFallback.textContent = "スケジュール取得に失敗しました";
         imageFallback.style.display = "block";
+        imageBox.classList.remove("with-button");
         doneButton.classList.remove("show");
       }
     }
@@ -359,54 +378,6 @@
       });
     }
 
-    function getCurrentContext(nowMin, schedule, scheduleType) {
-      const autoIndex = getCurrentItemIndex(nowMin, schedule);
-
-      if (
-        manualTaskIndex !== null &&
-        manualScheduleType === scheduleType &&
-        schedule[manualTaskIndex]
-      ) {
-        return {
-          item: schedule[manualTaskIndex],
-          index: manualTaskIndex,
-          isManual: true,
-          isOverdue: false
-        };
-      }
-
-      if (autoIndex >= 0) {
-        const item = schedule[autoIndex];
-        const duration = getItemDuration(item);
-        const elapsed = Math.max(0, getElapsedMinutes(item, nowMin));
-        const remain = duration - elapsed;
-
-        return {
-          item,
-          index: autoIndex,
-          isManual: false,
-          isOverdue: remain <= 0
-        };
-      }
-
-      const lastIndex = getLastPastItemIndex(nowMin, schedule);
-      if (lastIndex >= 0) {
-        return {
-          item: schedule[lastIndex],
-          index: lastIndex,
-          isManual: false,
-          isOverdue: true
-        };
-      }
-
-      return {
-        item: null,
-        index: -1,
-        isManual: false,
-        isOverdue: false
-      };
-    }
-
     function getLastPastItemIndex(nowMin, schedule) {
       if (!schedule.length) return -1;
 
@@ -429,6 +400,85 @@
       });
 
       return bestIndex;
+    }
+
+    function getCurrentContext(nowMin, schedule, scheduleType) {
+      const autoIndex = getCurrentItemIndex(nowMin, schedule);
+
+      // 1. 手動遷移中は最優先
+      if (
+        manualTaskIndex !== null &&
+        manualScheduleType === scheduleType &&
+        schedule[manualTaskIndex]
+      ) {
+        return {
+          item: schedule[manualTaskIndex],
+          index: manualTaskIndex,
+          isManual: true,
+          isOverdue: false,
+          autoIndex
+        };
+      }
+
+      // 2. 前回の表示から次タスクに切り替わった瞬間、未完了としてロック
+      if (
+        hasRenderedOnce &&
+        previousScheduleType === scheduleType &&
+        previousAutoIndex !== null &&
+        previousAutoIndex >= 0 &&
+        autoIndex !== previousAutoIndex &&
+        lockedOverdueIndex === null
+      ) {
+        lockedOverdueIndex = previousAutoIndex;
+        lockedOverdueScheduleType = scheduleType;
+      }
+
+      // 3. ロック中の未完了タスクがあれば、それを維持
+      if (
+        lockedOverdueIndex !== null &&
+        lockedOverdueScheduleType === scheduleType &&
+        schedule[lockedOverdueIndex]
+      ) {
+        return {
+          item: schedule[lockedOverdueIndex],
+          index: lockedOverdueIndex,
+          isManual: false,
+          isOverdue: true,
+          autoIndex
+        };
+      }
+
+      // 4. 通常の現在タスク
+      if (autoIndex >= 0) {
+        const item = schedule[autoIndex];
+        return {
+          item,
+          index: autoIndex,
+          isManual: false,
+          isOverdue: false,
+          autoIndex
+        };
+      }
+
+      // 5. 初回読み込み直後など、空白時間帯なら直前タスクを超過表示
+      const lastIndex = getLastPastItemIndex(nowMin, schedule);
+      if (lastIndex >= 0) {
+        return {
+          item: schedule[lastIndex],
+          index: lastIndex,
+          isManual: false,
+          isOverdue: true,
+          autoIndex
+        };
+      }
+
+      return {
+        item: null,
+        index: -1,
+        isManual: false,
+        isOverdue: false,
+        autoIndex
+      };
     }
 
     function getNextTask(schedule, index) {
@@ -595,6 +645,7 @@
 
         imageFallback.textContent = "画像をここに表示";
         imageFallback.style.display = "block";
+        imageBox.classList.remove("with-button");
         doneButton.classList.remove("show");
         return;
       }
@@ -637,8 +688,10 @@
 
       if (context.isOverdue) {
         doneButton.classList.add("show");
+        imageBox.classList.add("with-button");
       } else {
         doneButton.classList.remove("show");
+        imageBox.classList.remove("with-button");
       }
     }
 
@@ -683,6 +736,10 @@
       drawHands(now);
       updateRightPanel(context, nowMin, nextItem);
       updateRemain(context, nowMin);
+
+      previousAutoIndex = context.autoIndex;
+      previousScheduleType = scheduleType;
+      hasRenderedOnce = true;
     }
 
     function goToNextTask() {
@@ -694,8 +751,20 @@
       const context = getCurrentContext(nowMin, schedule, scheduleType);
       if (context.index < 0) return;
 
-      manualTaskIndex = (context.index + 1) % schedule.length;
-      manualScheduleType = scheduleType;
+      if (
+        lockedOverdueIndex !== null &&
+        lockedOverdueScheduleType === scheduleType
+      ) {
+        const nextIndex = (lockedOverdueIndex + 1) % schedule.length;
+        lockedOverdueIndex = null;
+        lockedOverdueScheduleType = null;
+        manualTaskIndex = nextIndex;
+        manualScheduleType = scheduleType;
+      } else {
+        manualTaskIndex = (context.index + 1) % schedule.length;
+        manualScheduleType = scheduleType;
+      }
+
       render();
     }
 
