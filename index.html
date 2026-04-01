@@ -5,280 +5,309 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>こども時間サイネージ</title>
   <style>
+    :root {
+      --bg: #f7f7f7;
+      --panel-left: #ffffff;
+      --panel-right: #eef6ff;
+      --card: #ffffff;
+      --card-sub: rgba(255, 255, 255, 0.72);
+      --text: #333333;
+      --muted: #666666;
+      --danger: #d93025;
+      --success: #4caf50;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --gap: clamp(10px, 1.5vw, 18px);
+      --pad: clamp(10px, 2vw, 24px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
+      background: var(--bg);
       font-family: sans-serif;
-      background: #f7f7f7;
       overflow: hidden;
     }
 
-    .container {
+    body {
+      color: var(--text);
+    }
+
+    .app {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
       width: 100vw;
       height: 100vh;
     }
 
-    .left, .right {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
+    .left,
+    .right {
+      min-width: 0;
+      min-height: 0;
+      padding: var(--pad);
     }
 
     .left {
-      background: #ffffff;
-      padding: clamp(8px, 2vw, 24px);
+      background: var(--panel-left);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .right {
-      flex-direction: column;
-      background: #eef6ff;
-      padding: clamp(8px, 2vw, 24px);
-      gap: clamp(8px, 2vw, 16px);
-      position: relative;
+      background: var(--panel-right);
+      display: grid;
+      grid-template-rows: minmax(84px, 0.24fr) minmax(56px, 0.12fr) minmax(0, 1fr);
+      gap: var(--gap);
+      align-items: stretch;
     }
 
     .clock-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      align-items: center;
+      justify-items: center;
+      min-height: 0;
     }
 
     canvas {
-      width: min(56vw, 56vh);
-      height: auto;
-      aspect-ratio: 1 / 1;
+      width: min(56vw, 56vh, 100%);
       max-width: 100%;
       max-height: 100%;
+      aspect-ratio: 1 / 1;
+      height: auto;
+      display: block;
     }
 
     #remainText {
       margin-top: 8px;
-      font-size: clamp(16px, 4vw, 40px);
+      font-size: clamp(18px, 3.8vw, 40px);
       font-weight: bold;
-      color: #333;
       text-align: center;
+      color: var(--text);
+      min-height: 1.4em;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      min-width: 0;
+      min-height: 0;
     }
 
     .task-box {
-      width: 100%;
-      flex: 0 0 22%;
-      background: white;
-      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(24px, 6vw, 64px);
-      font-weight: bold;
+      padding: clamp(16px, 2vw, 24px);
       text-align: center;
-      padding: 20px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      font-weight: bold;
+      font-size: clamp(28px, 5vw, 64px);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
 
     .next-task-box {
-      width: 100%;
-      flex: 0 0 10%;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 18px;
+      background: var(--card-sub);
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(14px, 2.5vw, 28px);
-      font-weight: bold;
-      text-align: center;
       padding: 10px 16px;
+      text-align: center;
+      font-weight: bold;
       color: #555;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      font-size: clamp(15px, 2.2vw, 28px);
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+      min-width: 0;
     }
 
-.image-box {
-  width: 100%;
-  flex: 1;
-  background: white;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  position: relative;
-  box-sizing: border-box;
-}
+    .media-card {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-height: 0;
+      overflow: hidden;
+    }
 
-.image-box.with-button {
-  padding-bottom: 84px;
-}
+    .image-area {
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 2vw, 20px);
+      overflow: hidden;
+    }
 
-.image-box img {
-  max-width: 100%;
-  max-height: calc(100% - 20px);
-  object-fit: contain;
-  position: relative;
-  z-index: 1;
-}
+    .image-area img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
 
-.fallback {
-  font-size: clamp(14px, 2.2vw, 24px);
-  color: #666;
-  text-align: center;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-}
+    .fallback {
+      color: var(--muted);
+      font-size: clamp(14px, 2.2vw, 24px);
+      text-align: center;
+      line-height: 1.4;
+      padding: 12px;
+    }
 
-.done-button {
-  display: none;
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
-  width: auto;
-  border: none;
-  border-radius: 20px;
-  padding: 18px 20px;
-  font-size: clamp(16px, 3vw, 36px);
-  font-weight: bold;
-  background: #4caf50;
-  color: white;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  z-index: 10;
-}
+    .action-area {
+      padding: 0 clamp(12px, 2vw, 20px) clamp(12px, 2vw, 20px);
+      display: none;
+    }
 
-.done-button.show {
-  display: block;
-}
+    .action-area.show {
+      display: block;
+    }
+
+    .done-button {
+      width: 100%;
+      border: none;
+      border-radius: 20px;
+      padding: 18px 20px;
+      font-size: clamp(18px, 2.8vw, 34px);
+      font-weight: bold;
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+      cursor: pointer;
+    }
 
     .done-button:active {
       transform: translateY(1px);
     }
 
-    /* スマホ縦 */
-    @media (max-width: 768px) and (orientation: portrait) {
-      .container {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
-      }
-
-      .left {
-        height: 50vh;
-      }
-
-      .right {
-        height: 50vh;
-        overflow-y: auto;
-      }
-
-      canvas {
-        width: min(90vw, calc(50vh - 80px));
-      }
+    .done-button:focus-visible {
+      outline: 3px solid rgba(76, 175, 80, 0.3);
+      outline-offset: 2px;
     }
 
-    /* スマホ横 */
-    @media (max-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+    /* 縦画面 */
+    @media (max-width: 900px) and (orientation: portrait) {
       html, body {
         overflow: auto;
       }
 
-      .container {
-        grid-template-columns: 40fr 60fr;
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 48vh 52vh;
+        height: auto;
+        min-height: 100vh;
       }
 
       .left,
       .right {
-        height: 100vh;
+        min-height: 0;
+      }
+
+      .right {
+        grid-template-rows: minmax(78px, auto) minmax(52px, auto) minmax(180px, 1fr);
+      }
+
+      canvas {
+        width: min(88vw, calc(48vh - 70px));
+      }
+    }
+
+    /* 低い横画面 */
+    @media (max-height: 560px) and (orientation: landscape) {
+      html, body {
+        overflow: auto;
+      }
+
+      .app {
+        grid-template-columns: 42fr 58fr;
+      }
+
+      .left,
+      .right {
         padding: 8px;
       }
 
       .right {
         gap: 8px;
-        justify-content: flex-start;
-        overflow-y: auto;
+        grid-template-rows: minmax(58px, auto) minmax(40px, auto) minmax(0, 1fr);
       }
 
       .task-box {
-        flex: 0 0 auto;
-        min-height: 60px;
-        max-height: 80px;
-        padding: 8px 10px;
+        padding: 10px 12px;
         font-size: clamp(18px, 3vw, 28px);
       }
 
       .next-task-box {
-        flex: 0 0 auto;
-        min-height: 36px;
-        max-height: 48px;
-        padding: 4px 10px;
-        font-size: clamp(12px, 2vw, 18px);
+        padding: 6px 10px;
+        font-size: clamp(12px, 1.8vw, 18px);
       }
 
-.image-box {
-    flex: 0 0 auto;
-    height: 110px;
-    min-height: 110px;
-    max-height: 110px;
-  }
+      .image-area {
+        padding: 8px 10px;
+      }
 
-  .image-box.with-button {
-    padding-bottom: 56px;
-  }
+      .image-area img {
+        max-height: 100%;
+      }
 
-  .image-box img {
-    max-width: 72%;
-    max-height: 60%;
-    object-fit: contain;
-    z-index: 1;
-  }
+      .action-area {
+        padding: 0 10px 10px;
+      }
 
-  .done-button {
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    padding: 8px 12px;
-    font-size: clamp(14px, 2vw, 18px);
-    z-index: 10;
-  }
+      .done-button {
+        padding: 10px 12px;
+        font-size: clamp(14px, 2vw, 18px);
+        border-radius: 14px;
+      }
 
       #remainText {
         font-size: clamp(12px, 2vw, 20px);
       }
 
       canvas {
-        width: min(30vw, 50vh);
+        width: min(32vw, 50vh);
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left">
+  <div class="app">
+    <section class="left">
       <div class="clock-wrapper">
         <canvas id="clock" width="900" height="900"></canvas>
         <div id="remainText"></div>
       </div>
-    </div>
+    </section>
 
-    <div class="right">
-      <div class="task-box" id="taskText">よみこみちゅう</div>
+    <section class="right">
+      <div class="task-box card" id="taskText">よみこみちゅう</div>
       <div class="next-task-box" id="nextTaskText">つぎ：---</div>
 
-      <div class="image-box" id="imageBox">
-        <div class="fallback" id="imageFallback">画像をここに表示</div>
-        <button class="done-button" id="doneButton">できた</button>
+      <div class="media-card card">
+        <div class="image-area" id="imageArea">
+          <div class="fallback" id="imageFallback">画像をここに表示</div>
+        </div>
+        <div class="action-area" id="actionArea">
+          <button class="done-button" id="doneButton">できた</button>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzu0Wf2Dj3BrkzIndCZo9WQL_SOdO4_DCm0i3rafChA7H22bW9Kmewk_nDHCkYlAUFG/exec";
 
-    let schedules = {
+    const schedules = {
       weekday: [],
       saturday: [],
       holiday: []
@@ -286,56 +315,43 @@
 
     const canvas = document.getElementById("clock");
     const ctx = canvas.getContext("2d");
+
     const taskText = document.getElementById("taskText");
     const nextTaskText = document.getElementById("nextTaskText");
-    const imageBox = document.getElementById("imageBox");
-    const imageFallback = document.getElementById("imageFallback");
     const remainText = document.getElementById("remainText");
+
+    const imageArea = document.getElementById("imageArea");
+    const imageFallback = document.getElementById("imageFallback");
+    const actionArea = document.getElementById("actionArea");
     const doneButton = document.getElementById("doneButton");
 
-    let manualTaskIndex = null;
-    let manualScheduleType = null;
+    let currentSchedules = {
+      weekday: [],
+      saturday: [],
+      holiday: []
+    };
 
-    let lockedOverdueIndex = null;
-    let lockedOverdueScheduleType = null;
-
-    let previousAutoIndex = null;
-    let previousScheduleType = null;
-    let hasRenderedOnce = false;
+    let pendingOverdueTaskKey = null;
+    let acknowledgedTaskKeys = new Set();
+    let previousAutoTaskKey = null;
 
     async function loadSchedules() {
       try {
-        const res = await fetch(GAS_URL + "?t=" + Date.now());
+        const res = await fetch(`${GAS_URL}?t=${Date.now()}`);
         if (!res.ok) throw new Error("Failed to fetch schedule");
 
         const data = await res.json();
-        schedules = {
-          weekday: Array.isArray(data.weekday) ? data.weekday : [],
-          saturday: Array.isArray(data.saturday) ? data.saturday : [],
-          holiday: Array.isArray(data.holiday) ? data.holiday : []
-        };
-
-        const currentType = getTodayScheduleType();
-        if (manualScheduleType && manualScheduleType !== currentType) {
-          manualTaskIndex = null;
-          manualScheduleType = null;
-        }
-        if (lockedOverdueScheduleType && lockedOverdueScheduleType !== currentType) {
-          lockedOverdueIndex = null;
-          lockedOverdueScheduleType = null;
-        }
+        currentSchedules.weekday = Array.isArray(data.weekday) ? data.weekday : [];
+        currentSchedules.saturday = Array.isArray(data.saturday) ? data.saturday : [];
+        currentSchedules.holiday = Array.isArray(data.holiday) ? data.holiday : [];
       } catch (err) {
         console.error(err);
         taskText.textContent = "よみこみにしっぱい";
+        taskText.style.color = "#d93025";
         nextTaskText.textContent = "つぎ：---";
-
-        const existingImg = imageBox.querySelector("img");
-        if (existingImg) existingImg.remove();
-
-        imageFallback.textContent = "スケジュール取得に失敗しました";
-        imageFallback.style.display = "block";
-        imageBox.classList.remove("with-button");
-        doneButton.classList.remove("show");
+        remainText.textContent = "";
+        renderImage(null);
+        hideDoneButton();
       }
     }
 
@@ -347,7 +363,20 @@
     }
 
     function getTodaySchedule() {
-      return schedules[getTodayScheduleType()] || [];
+      return currentSchedules[getTodayScheduleType()] || [];
+    }
+
+    function getDateKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function buildTaskKey(scheduleType, index, item) {
+      if (!item) return null;
+      return `${getDateKey()}|${scheduleType}|${index}|${item.start}|${item.end}|${item.task}`;
     }
 
     function timeToMinutes(hhmm) {
@@ -375,123 +404,132 @@
       return (1440 - s) + nowMin;
     }
 
-    function getCurrentItemIndex(nowMin, schedule) {
-      return schedule.findIndex(item => {
-        const s = timeToMinutes(item.start);
-        const e = timeToMinutes(item.end);
+    function isCurrentItem(item, nowMin) {
+      const s = timeToMinutes(item.start);
+      const e = timeToMinutes(item.end);
 
-        if (s < e) return nowMin >= s && nowMin < e;
-        return nowMin >= s || nowMin < e;
-      });
+      if (s < e) return nowMin >= s && nowMin < e;
+      return nowMin >= s || nowMin < e;
     }
 
-    function getLastPastItemIndex(nowMin, schedule) {
-      if (!schedule.length) return -1;
+    function hasEnded(item, nowMin) {
+      const s = timeToMinutes(item.start);
+      const duration = getItemDuration(item);
+      const isOvernight = timeToMinutes(item.end) <= s;
 
-      let bestIndex = -1;
-      let bestEnd = -1;
+      if (isOvernight && nowMin < s) return false;
+
+      const end = s + duration;
+      return nowMin >= end;
+    }
+
+    function getCurrentItemIndex(nowMin, schedule) {
+      return schedule.findIndex(item => isCurrentItem(item, nowMin));
+    }
+
+    function getMostRecentEndedUnacknowledged(scheduleType, schedule, nowMin) {
+      let best = null;
 
       schedule.forEach((item, index) => {
+        if (!hasEnded(item, nowMin)) return;
+
+        const taskKey = buildTaskKey(scheduleType, index, item);
+        if (acknowledgedTaskKeys.has(taskKey)) return;
+
         const start = timeToMinutes(item.start);
         const duration = getItemDuration(item);
-        const isOvernight = timeToMinutes(item.end) <= start;
+        const endTotal = start + duration;
 
-        if (isOvernight && nowMin < start) return;
-
-        const end = start + duration;
-
-        if (nowMin >= end && end > bestEnd) {
-          bestEnd = end;
-          bestIndex = index;
+        if (!best || endTotal > best.endTotal) {
+          best = {
+            item,
+            index,
+            taskKey,
+            endTotal
+          };
         }
       });
 
-      return bestIndex;
-    }
-
-    function getCurrentContext(nowMin, schedule, scheduleType) {
-      const autoIndex = getCurrentItemIndex(nowMin, schedule);
-
-      // 1. 手動遷移中は最優先
-      if (
-        manualTaskIndex !== null &&
-        manualScheduleType === scheduleType &&
-        schedule[manualTaskIndex]
-      ) {
-        return {
-          item: schedule[manualTaskIndex],
-          index: manualTaskIndex,
-          isManual: true,
-          isOverdue: false,
-          autoIndex
-        };
-      }
-
-      // 2. 前回の表示から次タスクに切り替わった瞬間、未完了としてロック
-      if (
-        hasRenderedOnce &&
-        previousScheduleType === scheduleType &&
-        previousAutoIndex !== null &&
-        previousAutoIndex >= 0 &&
-        autoIndex !== previousAutoIndex &&
-        lockedOverdueIndex === null
-      ) {
-        lockedOverdueIndex = previousAutoIndex;
-        lockedOverdueScheduleType = scheduleType;
-      }
-
-      // 3. ロック中の未完了タスクがあれば、それを維持
-      if (
-        lockedOverdueIndex !== null &&
-        lockedOverdueScheduleType === scheduleType &&
-        schedule[lockedOverdueIndex]
-      ) {
-        return {
-          item: schedule[lockedOverdueIndex],
-          index: lockedOverdueIndex,
-          isManual: false,
-          isOverdue: true,
-          autoIndex
-        };
-      }
-
-      // 4. 通常の現在タスク
-      if (autoIndex >= 0) {
-        const item = schedule[autoIndex];
-        return {
-          item,
-          index: autoIndex,
-          isManual: false,
-          isOverdue: false,
-          autoIndex
-        };
-      }
-
-      // 5. 初回読み込み直後など、空白時間帯なら直前タスクを超過表示
-      const lastIndex = getLastPastItemIndex(nowMin, schedule);
-      if (lastIndex >= 0) {
-        return {
-          item: schedule[lastIndex],
-          index: lastIndex,
-          isManual: false,
-          isOverdue: true,
-          autoIndex
-        };
-      }
-
-      return {
-        item: null,
-        index: -1,
-        isManual: false,
-        isOverdue: false,
-        autoIndex
-      };
+      return best;
     }
 
     function getNextTask(schedule, index) {
       if (!schedule.length || index < 0) return null;
       const nextIndex = (index + 1) % schedule.length;
       return schedule[nextIndex] || null;
+    }
+
+    function getCurrentContext(nowMin, scheduleType, schedule) {
+      const autoIndex = getCurrentItemIndex(nowMin, schedule);
+      const autoItem = autoIndex >= 0 ? schedule[autoIndex] : null;
+      const autoTaskKey = autoItem ? buildTaskKey(scheduleType, autoIndex, autoItem) : null;
+
+      if (previousAutoTaskKey && autoTaskKey !== previousAutoTaskKey) {
+        const prevParts = previousAutoTaskKey.split("|");
+        const prevScheduleType = prevParts[1];
+        const prevIndex = Number(prevParts[2]);
+
+        if (prevScheduleType === scheduleType && schedule[prevIndex]) {
+          const prevItem = schedule[prevIndex];
+          const stillSameKey = buildTaskKey(scheduleType, prevIndex, prevItem);
+
+          if (
+            stillSameKey === previousAutoTaskKey &&
+            !acknowledgedTaskKeys.has(stillSameKey)
+          ) {
+            pendingOverdueTaskKey = stillSameKey;
+          }
+        }
+      }
+
+      if (pendingOverdueTaskKey) {
+        const parts = pendingOverdueTaskKey.split("|");
+        const pendingDate = parts[0];
+        const pendingType = parts[1];
+        const pendingIndex = Number(parts[2]);
+
+        if (pendingDate === getDateKey() && pendingType === scheduleType && schedule[pendingIndex]) {
+          return {
+            item: schedule[pendingIndex],
+            index: pendingIndex,
+            isOverdue: true,
+            autoIndex,
+            autoTaskKey
+          };
+        } else {
+          pendingOverdueTaskKey = null;
+        }
+      }
+
+      const endedUnacked = getMostRecentEndedUnacknowledged(scheduleType, schedule, nowMin);
+      if (endedUnacked && autoIndex === -1) {
+        pendingOverdueTaskKey = endedUnacked.taskKey;
+        return {
+          item: endedUnacked.item,
+          index: endedUnacked.index,
+          isOverdue: true,
+          autoIndex,
+          autoTaskKey
+        };
+      }
+
+      if (autoIndex >= 0) {
+        return {
+          item: autoItem,
+          index: autoIndex,
+          isOverdue: false,
+          autoIndex,
+          autoTaskKey
+        };
+      }
+
+      return {
+        item: null,
+        index: -1,
+        isOverdue: false,
+        autoIndex,
+        autoTaskKey
+      };
     }
 
     function clockMinuteToAngle(clockMin) {
@@ -610,6 +648,30 @@
       ctx.fill();
     }
 
+    function drawTaskRings(context, nowMin) {
+      const item = context.item;
+      if (!item) return;
+
+      const startMin = timeToMinutes(item.start);
+      const duration = getItemDuration(item);
+
+      let progressSpan = 0;
+      let progressColor = item.color || "#7aa6ff";
+
+      if (context.isOverdue) {
+        progressSpan = duration;
+        progressColor = "#d93025";
+      } else {
+        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
+        const remain = Math.max(0, Math.ceil(duration - elapsed));
+        progressSpan = elapsed;
+        progressColor = remain <= 5 ? "#d93025" : (item.color || "#7aa6ff");
+      }
+
+      drawClockRange(startMin, duration, "rgba(180, 180, 180, 0.35)", 24, 370);
+      drawClockRange(startMin, progressSpan, progressColor, 18, 340);
+    }
+
     function updateRemain(context, nowMin) {
       const item = context.item;
 
@@ -625,18 +687,48 @@
         return;
       }
 
-      if (context.isManual) {
-        remainText.textContent = "つぎにすすめるよ";
-        remainText.style.color = "#333";
-        return;
-      }
-
       const duration = getItemDuration(item);
       const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
       const remain = Math.max(0, Math.ceil(duration - elapsed));
 
       remainText.textContent = `あと ${remain} ふん`;
       remainText.style.color = remain <= 5 ? "#d93025" : "#333";
+    }
+
+    function clearImage() {
+      const existingImg = imageArea.querySelector("img");
+      if (existingImg) existingImg.remove();
+    }
+
+    function renderImage(item) {
+      clearImage();
+
+      if (!item || !item.image) {
+        imageFallback.textContent = item ? "画像をここに表示" : "画像をここに表示";
+        imageFallback.style.display = "block";
+        return;
+      }
+
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.alt = item.task || "";
+
+      img.onerror = () => {
+        clearImage();
+        imageFallback.textContent = "画像が見つかりません";
+        imageFallback.style.display = "block";
+      };
+
+      imageArea.appendChild(img);
+      imageFallback.style.display = "none";
+    }
+
+    function showDoneButton() {
+      actionArea.classList.add("show");
+    }
+
+    function hideDoneButton() {
+      actionArea.classList.remove("show");
     }
 
     function updateRightPanel(context, nowMin, nextItem) {
@@ -646,14 +738,8 @@
         taskText.textContent = "じかんがくるまで まってね";
         taskText.style.color = "#333";
         nextTaskText.textContent = "つぎ：---";
-
-        const existingImg = imageBox.querySelector("img");
-        if (existingImg) existingImg.remove();
-
-        imageFallback.textContent = "画像をここに表示";
-        imageFallback.style.display = "block";
-        imageBox.classList.remove("with-button");
-        doneButton.classList.remove("show");
+        renderImage(null);
+        hideDoneButton();
         return;
       }
 
@@ -661,7 +747,7 @@
 
       if (context.isOverdue) {
         mainColor = "#d93025";
-      } else if (!context.isManual) {
+      } else {
         const duration = getItemDuration(item);
         const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
         const remain = Math.max(0, Math.ceil(duration - elapsed));
@@ -670,63 +756,23 @@
 
       taskText.textContent = item.task;
       taskText.style.color = mainColor;
-
       nextTaskText.textContent = nextItem ? `つぎ：${nextItem.task}` : "つぎ：---";
 
-      const existingImg = imageBox.querySelector("img");
-      if (existingImg) existingImg.remove();
-
-      if (item.image) {
-        const img = document.createElement("img");
-        img.src = item.image;
-        img.alt = item.task;
-
-        img.onerror = () => {
-          imageFallback.textContent = "画像が見つかりません";
-          imageFallback.style.display = "block";
-        };
-
-        imageBox.insertBefore(img, doneButton);
-        imageFallback.style.display = "none";
-      } else {
-        imageFallback.textContent = "画像をここに表示";
-        imageFallback.style.display = "block";
-      }
+      renderImage(item);
 
       if (context.isOverdue) {
-        doneButton.classList.add("show");
-        imageBox.classList.add("with-button");
+        showDoneButton();
       } else {
-        doneButton.classList.remove("show");
-        imageBox.classList.remove("with-button");
+        hideDoneButton();
       }
     }
 
-    function drawTaskRings(context, nowMin) {
-      const item = context.item;
-      if (!item) return;
+    function acknowledgeCurrentOverdue() {
+      if (!pendingOverdueTaskKey) return;
 
-      const startMin = timeToMinutes(item.start);
-      const duration = getItemDuration(item);
-
-      let progressSpan = 0;
-      let progressColor = item.color;
-
-      if (context.isOverdue) {
-        progressSpan = duration;
-        progressColor = "#d93025";
-      } else if (context.isManual) {
-        progressSpan = duration;
-        progressColor = item.color;
-      } else {
-        const elapsed = Math.max(0, Math.min(getElapsedMinutes(item, nowMin), duration));
-        const remain = Math.max(0, Math.ceil(duration - elapsed));
-        progressSpan = elapsed;
-        progressColor = remain <= 5 ? "#d93025" : item.color;
-      }
-
-      drawClockRange(startMin, duration, "rgba(180, 180, 180, 0.35)", 24, 370);
-      drawClockRange(startMin, progressSpan, progressColor, 18, 340);
+      acknowledgedTaskKeys.add(pendingOverdueTaskKey);
+      pendingOverdueTaskKey = null;
+      render();
     }
 
     function render() {
@@ -735,7 +781,7 @@
       const scheduleType = getTodayScheduleType();
       const schedule = getTodaySchedule();
 
-      const context = getCurrentContext(nowMin, schedule, scheduleType);
+      const context = getCurrentContext(nowMin, scheduleType, schedule);
       const nextItem = getNextTask(schedule, context.index);
 
       drawClockFace();
@@ -744,38 +790,10 @@
       updateRightPanel(context, nowMin, nextItem);
       updateRemain(context, nowMin);
 
-      previousAutoIndex = context.autoIndex;
-      previousScheduleType = scheduleType;
-      hasRenderedOnce = true;
+      previousAutoTaskKey = context.autoTaskKey || previousAutoTaskKey;
     }
 
-    function goToNextTask() {
-      const scheduleType = getTodayScheduleType();
-      const schedule = getTodaySchedule();
-      if (!schedule.length) return;
-
-      const nowMin = getNowMinutes();
-      const context = getCurrentContext(nowMin, schedule, scheduleType);
-      if (context.index < 0) return;
-
-      if (
-        lockedOverdueIndex !== null &&
-        lockedOverdueScheduleType === scheduleType
-      ) {
-        const nextIndex = (lockedOverdueIndex + 1) % schedule.length;
-        lockedOverdueIndex = null;
-        lockedOverdueScheduleType = null;
-        manualTaskIndex = nextIndex;
-        manualScheduleType = scheduleType;
-      } else {
-        manualTaskIndex = (context.index + 1) % schedule.length;
-        manualScheduleType = scheduleType;
-      }
-
-      render();
-    }
-
-    doneButton.addEventListener("click", goToNextTask);
+    doneButton.addEventListener("click", acknowledgeCurrentOverdue);
 
     async function init() {
       await loadSchedules();
