@@ -218,30 +218,32 @@
         font-size: clamp(12px, 2vw, 18px);
       }
 
-      .image-box {
-        flex: 0 0 auto;
-        height: 110px;
-        min-height: 110px;
-        max-height: 110px;
-      }
+.image-box {
+    flex: 0 0 auto;
+    height: 110px;
+    min-height: 110px;
+    max-height: 110px;
+  }
 
-      .image-box.with-button {
-        padding-bottom: 56px;
-      }
+  .image-box.with-button {
+    padding-bottom: 56px;
+  }
 
-      .image-box img {
-        max-width: 72%;
-        max-height: 60%;
-        object-fit: contain;
-      }
+  .image-box img {
+    max-width: 72%;
+    max-height: 60%;
+    object-fit: contain;
+    z-index: 1;
+  }
 
-      .done-button {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-        padding: 8px 12px;
-        font-size: clamp(14px, 2vw, 18px);
-      }
+  .done-button {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 8px 12px;
+    font-size: clamp(14px, 2vw, 18px);
+    z-index: 10;
+  }
 
       #remainText {
         font-size: clamp(12px, 2vw, 20px);
