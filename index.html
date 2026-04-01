@@ -98,57 +98,62 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    .image-box {
-      width: 100%;
-      flex: 1;
-      background: white;
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      position: relative;
-      box-sizing: border-box;
-    }
+.image-box {
+  width: 100%;
+  flex: 1;
+  background: white;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  box-sizing: border-box;
+}
 
-    .image-box.with-button {
-      padding-bottom: 84px;
-    }
+.image-box.with-button {
+  padding-bottom: 84px;
+}
 
-    .image-box img {
-      max-width: 100%;
-      max-height: calc(100% - 20px);
-      object-fit: contain;
-    }
+.image-box img {
+  max-width: 100%;
+  max-height: calc(100% - 20px);
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
 
-    .fallback {
-      font-size: clamp(14px, 2.2vw, 24px);
-      color: #666;
-      text-align: center;
-      padding: 20px;
-    }
+.fallback {
+  font-size: clamp(14px, 2.2vw, 24px);
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
 
-    .done-button {
-      display: none;
-      position: absolute;
-      left: 16px;
-      right: 16px;
-      bottom: 16px;
-      width: auto;
-      border: none;
-      border-radius: 20px;
-      padding: 18px 20px;
-      font-size: clamp(16px, 3vw, 36px);
-      font-weight: bold;
-      background: #4caf50;
-      color: white;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    }
+.done-button {
+  display: none;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: auto;
+  border: none;
+  border-radius: 20px;
+  padding: 18px 20px;
+  font-size: clamp(16px, 3vw, 36px);
+  font-weight: bold;
+  background: #4caf50;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
 
-    .done-button.show {
-      display: block;
-    }
+.done-button.show {
+  display: block;
+}
 
     .done-button:active {
       transform: translateY(1px);
